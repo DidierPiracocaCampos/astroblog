@@ -61,11 +61,19 @@ function anchor(children: readonly HastChild[]): HastElement | undefined {
 const noAds = (data: unknown) =>
   (data as { astro?: { frontmatter?: { noAds?: unknown } } } | undefined)?.astro?.frontmatter?.noAds === true;
 
+/**
+ * Institutional pages (`src/content/pages/`) never get the in-article ad (spec §6 scopes it
+ * to posts). Only the default location is detected; a custom `pages` loader base is not.
+ */
+export function isInstitutionalPage(path: string | undefined): boolean {
+  return Boolean(path?.replace(/\\/g, '/').includes('/src/content/pages/'));
+}
+
 /** unified/rehype plugin: `rehypePlugins: [[rehypeAd, opts]]`. */
 export function rehypeAd(opts: AdOptions) {
-  return (tree: HastRoot, file?: { data?: unknown }): void => {
+  return (tree: HastRoot, file?: { data?: unknown; path?: string }): void => {
     const node = adNode(opts);
-    if (!node || noAds(file?.data)) return;
+    if (!node || noAds(file?.data) || isInstitutionalPage(file?.path)) return;
     const target = anchor(tree.children);
     if (!target) return;
     tree.children.splice(tree.children.indexOf(target) + 1, 0, node);
@@ -75,6 +83,7 @@ export function rehypeAd(opts: AdOptions) {
 /** Structural subset of Sätteri's `HastVisitorContext` used here. */
 interface SatteriCtx {
   readonly data: unknown;
+  readonly fileURL: URL | undefined;
   insertAfter(node: unknown, newNode: unknown): void;
 }
 
@@ -84,7 +93,8 @@ export function satteriAd(opts: AdOptions) {
     name: 'astroblog-ad',
     after(root: Readonly<HastRoot>, ctx: SatteriCtx): void {
       const node = adNode(opts);
-      if (!node || noAds(ctx.data)) return;
+      const path = ctx.fileURL && decodeURIComponent(ctx.fileURL.pathname);
+      if (!node || noAds(ctx.data) || isInstitutionalPage(path)) return;
       const target = anchor(root.children);
       if (target) ctx.insertAfter(target, node);
     },

@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { markdownToHast, markdownToHtml } from 'satteri';
 import { rehypeAd, satteriAd } from '../../lib/rehype-ad';
 
@@ -46,6 +49,15 @@ describe('satteriAd (Astro 7 default pipeline)', () => {
     expect(render(MD, { ...OPTS, client: undefined })).not.toContain('ad-slot');
   });
 
+  it('skips institutional pages under src/content/pages/ but not blog posts', () => {
+    const run = (fileURL: URL) =>
+      markdownToHtml(MD, { hastPlugins: [satteriAd(OPTS)], fileURL, data: { astro: { frontmatter: {} } } }).html;
+    expect(run(pathToFileURL(join(tmpdir(), 'site', 'src', 'content', 'pages', 'privacidad.md'))))
+      .not.toContain('ad-slot');
+    expect(run(pathToFileURL(join(tmpdir(), 'site', 'src', 'content', 'blog', 'post.md'))))
+      .toContain('ad-slot');
+  });
+
   it('renders placeholder in dev', () => {
     const html = render(MD, { ...OPTS, dev: true });
     expect(html).not.toContain('adsbygoogle');
@@ -75,6 +87,19 @@ describe('rehypeAd (unified transformer)', () => {
     const t = tree();
     rehypeAd(OPTS)(t, { data: { astro: { frontmatter: { noAds: true } } } });
     expect(tags(t)).toEqual(['h2', 'p', 'h2', 'p', 'h2']);
+  });
+
+  it('skips institutional pages under src/content/pages/ but not blog posts', () => {
+    const data = { astro: { frontmatter: {} } };
+    const page = tree();
+    rehypeAd(OPTS)(page, { data, path: 'C:\\site\\src\\content\\pages\\privacidad.md' });
+    expect(tags(page)).toEqual(['h2', 'p', 'h2', 'p', 'h2']);
+    const posix = tree();
+    rehypeAd(OPTS)(posix, { data, path: '/site/src/content/pages/privacidad.md' });
+    expect(tags(posix)).toEqual(['h2', 'p', 'h2', 'p', 'h2']);
+    const post = tree();
+    rehypeAd(OPTS)(post, { data, path: 'C:\\site\\src\\content\\blog\\post.md' });
+    expect(tags(post)).toContain('div.ad-slot.not-prose');
   });
 
   it('works without vfile data', () => {

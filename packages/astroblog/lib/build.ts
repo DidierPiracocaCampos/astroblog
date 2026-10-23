@@ -31,6 +31,11 @@ export async function runPagefind(dir: URL): Promise<{ pages: number }> {
     if (written.errors.length) throw new Error(`astroblog: pagefind could not write files: ${written.errors.join('; ')}`);
     return { pages: added.page_count };
   } finally {
-    await pagefind.close();
+    // A failing close must not mask the original indexing error.
+    try {
+      await pagefind.close();
+    } catch {
+      /* ignore */
+    }
   }
 }
