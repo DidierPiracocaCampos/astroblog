@@ -1,0 +1,34 @@
+---
+// Post listing (home, home pages 2..n, category, tag, author): BaseLayout + <h1>, optional `intro`
+// slot, a grid of PostCards (or the empty state) and Pagination.
+import type { CollectionEntry } from 'astro:content';
+import ui from 'virtual:astroblog/ui';
+import { Pagination, PostCard } from 'virtual:astroblog/components';
+import BaseLayout from './BaseLayout.astro';
+import type { Props as BaseProps } from './BaseLayout.astro';
+
+export interface Props extends Pick<BaseProps, 'title' | 'description' | 'breadcrumbs'> {
+  heading: string;
+  posts: CollectionEntry<'blog'>[];
+  /** 1-based current page (default 1). */
+  currentPage?: number;
+  /** Hrefs (with `base`) of every page; omit when the listing is not paginated. */
+  urls?: string[];
+}
+
+const { title, description, breadcrumbs, heading, posts, currentPage = 1, urls = [] } = Astro.props;
+---
+<BaseLayout title={title} description={description} breadcrumbs={breadcrumbs}>
+  <h1 class="mb-8 text-3xl font-bold sm:text-4xl">{heading}</h1>
+  <slot name="intro" />
+  {posts.length > 0 ? (
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  ) : (
+    <div role="status" class="alert">
+      <span>{ui.emptyBlog}</span>
+    </div>
+  )}
+  <Pagination currentPage={currentPage} urls={urls} />
+</BaseLayout>

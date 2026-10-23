@@ -1,3 +1,21 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.RelatedPosts`. Grid of PostCards for the related posts it receives
+// (PostLayout passes `relatedPosts(post, all, 3)`); renders nothing when empty.
+import type { CollectionEntry } from 'astro:content';
+import ui from 'virtual:astroblog/ui';
+import { PostCard } from 'virtual:astroblog/components';
+
+export interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
 ---
+{posts.length > 0 && (
+  <section class="mt-12" aria-labelledby="related-title" data-pagefind-ignore>
+    <h2 id="related-title" class="mb-6 text-2xl font-bold">{ui.related}</h2>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+)}

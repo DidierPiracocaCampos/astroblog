@@ -86,3 +86,43 @@ export function groupByTaxonomy<T extends PostLike>(
   }
   return groups;
 }
+
+/** Post author: frontmatter `author`, else the site's `author.name`. */
+export function authorOf(post: PostLike, fallback: string | undefined): string | undefined {
+  return post.data.author ?? fallback;
+}
+
+/** Copies of `posts` whose missing `author` is set to `fallback` (inputs are not mutated). */
+export function withDefaultAuthor<T extends PostLike>(posts: T[], fallback: string | undefined): T[] {
+  return posts.map((p) => (p.data.author || !fallback ? p : { ...p, data: { ...p.data, author: fallback } }));
+}
+
+const LENGTH_TEXT = {
+  es: {
+    title: (id: string, n: number) => `[astroblog] el título del post "${id}" tiene ${n} caracteres (recomendado: 70 como máximo).`,
+    description: (id: string, n: number) => `[astroblog] la descripción del post "${id}" tiene ${n} caracteres (recomendado: entre 50 y 160).`,
+  },
+  en: {
+    title: (id: string, n: number) => `[astroblog] the title of post "${id}" has ${n} characters (recommended: at most 70).`,
+    description: (id: string, n: number) => `[astroblog] the description of post "${id}" has ${n} characters (recommended: 50 to 160).`,
+  },
+} as const;
+
+/** SEO length warnings (spec §3): title > 70 or description outside 50–160 characters. */
+export function lengthWarnings(
+  post: { id: string; data: { title: string; description: string } },
+  lang: 'es' | 'en',
+): string[] {
+  const t = LENGTH_TEXT[lang];
+  const title = [...post.data.title].length;
+  const description = [...post.data.description].length;
+  const out: string[] = [];
+  if (title > 70) out.push(t.title(post.id, title));
+  if (description < 50 || description > 160) out.push(t.description(post.id, description));
+  return out;
+}
+
+/** Long date in the site language. Dates from frontmatter are UTC midnight, so format in UTC. */
+export function formatDate(date: Date, lang: 'es' | 'en'): string {
+  return new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(date);
+}

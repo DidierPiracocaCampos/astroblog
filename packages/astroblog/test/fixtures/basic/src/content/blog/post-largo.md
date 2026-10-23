@@ -1,6 +1,6 @@
 ---
 title: Un post largo
-description: Artículo largo con varias secciones.
+description: Artículo largo con varias secciones para probar la tabla de contenidos.
 pubDate: 2026-02-15
 updatedDate: 2026-03-01
 category: Programación Web

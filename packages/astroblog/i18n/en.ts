@@ -12,6 +12,8 @@ export const en: UIStrings = {
   toc: 'Contents',
   related: 'Related posts',
   share: 'Share',
+  copyLink: 'Copy link',
+  linkCopied: 'Link copied',
   previous: 'Previous',
   next: 'Next',
   page: 'Page',

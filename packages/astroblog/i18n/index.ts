@@ -14,6 +14,8 @@ export interface UIStrings {
   toc: string;
   related: string;
   share: string;
+  copyLink: string;
+  linkCopied: string;
   previous: string;
   next: string;
   page: string;

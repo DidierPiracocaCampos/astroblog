@@ -1,3 +1,22 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.TableOfContents`. daisyUI `menu` of the post headings it receives
+// (PostLayout passes depth 2–3 and only renders it with at least 3 of them).
+import type { MarkdownHeading } from 'astro';
+import ui from 'virtual:astroblog/ui';
+
+export interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
 ---
+{headings.length > 0 && (
+  <nav class="lg:sticky lg:top-8" aria-labelledby="toc-title" data-pagefind-ignore>
+    <h2 id="toc-title" class="px-4 pb-2 text-sm font-semibold uppercase tracking-wide text-base-content/70">{ui.toc}</h2>
+    <ul class="menu menu-sm w-full">
+      {headings.map((h) => (
+        <li class:list={[{ 'ps-4': h.depth > 2 }]}><a href={`#${h.slug}`}>{h.text}</a></li>
+      ))}
+    </ul>
+  </nav>
+)}

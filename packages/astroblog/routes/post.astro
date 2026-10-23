@@ -1,17 +1,24 @@
 ---
-// stub: replaced in Task 12
+// Post page (`/blog/[...slug]`). Drafts are only built in `astro dev`. Emits SEO length warnings
+// (title > 70, description outside 50–160) once per post, when the paths are computed.
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import config from 'virtual:astroblog/config';
-export function getStaticPaths() {
-  return [];
+import PostLayout from '../layouts/PostLayout.astro';
+import { lengthWarnings, publishedPosts, relatedPosts } from '../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = publishedPosts(await getCollection('blog'), { includeDrafts: import.meta.env.DEV });
+  for (const post of posts) for (const warning of lengthWarnings(post, config.lang)) console.warn(warning);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post, related: relatedPosts(post, posts, 3) },
+  }));
 }
+
+const { post, related } = Astro.props as { post: CollectionEntry<'blog'>; related: CollectionEntry<'blog'>[] };
+const { Content, headings } = await render(post);
 ---
-<html lang={config.lang}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{config.title}</title>
-  </head>
-  <body>
-    <h1>{config.title}</h1>
-  </body>
-</html>
+<PostLayout post={post} headings={headings} related={related}>
+  <Content />
+</PostLayout>

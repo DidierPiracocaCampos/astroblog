@@ -1,3 +1,49 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.ShareLinks`. Plain share links (no third-party scripts): X, Facebook,
+// LinkedIn, WhatsApp and "copy link" (an <a> to the post that copies its URL when JS is available).
+// Network names are proper nouns, so they are not UI strings.
+import ui from 'virtual:astroblog/ui';
+
+export interface Props {
+  /** Absolute URL of the post. */
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const u = encodeURIComponent(url);
+const text = encodeURIComponent(title);
+const networks = [
+  { name: 'X', href: `https://x.com/intent/post?url=${u}&text=${text}` },
+  { name: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+  { name: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+  { name: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
+];
 ---
+<section class="mt-10" aria-labelledby="share-title" data-share-links data-pagefind-ignore>
+  <h2 id="share-title" class="mb-3 text-sm font-semibold uppercase tracking-wide text-base-content/70">{ui.share}</h2>
+  <ul class="flex flex-wrap gap-2">
+    {networks.map((n) => (
+      <li><a class="btn btn-sm" href={n.href} target="_blank" rel="noopener noreferrer">{n.name}</a></li>
+    ))}
+    <li>
+      <a class="btn btn-sm" href={url} data-copy-link data-copied-label={ui.linkCopied}>{ui.copyLink}</a>
+    </li>
+  </ul>
+</section>
+<script>
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-copy-link]')) {
+    link.addEventListener('click', async (event) => {
+      if (!navigator.clipboard) return; // falls back to following the link
+      event.preventDefault();
+      try {
+        await navigator.clipboard.writeText(link.href);
+        const label = link.textContent;
+        link.textContent = link.dataset.copiedLabel ?? label;
+        setTimeout(() => { link.textContent = label; }, 2000);
+      } catch {
+        window.location.href = link.href;
+      }
+    });
+  }
+</script>

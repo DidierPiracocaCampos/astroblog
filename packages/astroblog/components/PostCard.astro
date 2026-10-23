@@ -1,3 +1,47 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.PostCard`. daisyUI `card` for a post in listings: cover (astro:assets),
+// category badge, date, reading time and a "read more" link.
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+import routes from 'virtual:astroblog/routes';
+import { t } from '../i18n/index';
+import { formatDate, readingTime } from '../lib/posts';
+import { routePath, taxonomyPath, withBase } from '../lib/routes';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, cover, coverAlt, category } = post.data;
+const base = import.meta.env.BASE_URL;
+const href = withBase(base, routePath(config, 'post', post.id));
+const categoryPath = taxonomyPath(routes.paths, 'category', category);
+const minutes = readingTime(post.body ?? '');
 ---
+<article class="card card-border bg-base-100 h-full">
+  {cover && (
+    <figure>
+      <a href={href} tabindex="-1" aria-hidden="true" class="block w-full">
+        <Image src={cover} alt={coverAlt ?? ''} class="aspect-video w-full object-cover" />
+      </a>
+    </figure>
+  )}
+  <div class="card-body">
+    <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70">
+      {categoryPath
+        ? <a href={withBase(base, categoryPath)} class="badge badge-soft badge-primary">{category}</a>
+        : <span class="badge badge-soft badge-primary">{category}</span>}
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate, config.lang)}</time>
+      <span aria-hidden="true">·</span>
+      <span>{t(ui.readingTime, { n: minutes })}</span>
+    </div>
+    <h2 class="card-title"><a href={href} class="link link-hover">{title}</a></h2>
+    <p class="text-base-content/80">{description}</p>
+    <div class="card-actions justify-end">
+      <a href={href} class="link link-primary" aria-label={`${ui.readMore}: ${title}`}>{ui.readMore}</a>
+    </div>
+  </div>
+</article>

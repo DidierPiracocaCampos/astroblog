@@ -1,17 +1,31 @@
 ---
-// stub: replaced in Task 12
+// Home listing pages 2..n (`/pagina/[page]`). Page 1 is not generated here: it is the home (`/`).
+import type { GetStaticPathsOptions, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import config from 'virtual:astroblog/config';
-export function getStaticPaths() {
-  return [];
+import ui from 'virtual:astroblog/ui';
+import ListLayout from '../layouts/ListLayout.astro';
+import { publishedPosts } from '../lib/posts';
+import { homePagesPrefix, paginationPaths, withBase } from '../lib/routes';
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const posts = publishedPosts(await getCollection('blog'), { includeDrafts: import.meta.env.DEV });
+  return paginate(posts, { pageSize: config.postsPerPage }).filter((p) => p.props.page.currentPage > 1);
 }
+
+const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
+const base = import.meta.env.BASE_URL;
+const prefix = homePagesPrefix(config);
+const urls = paginationPaths('/', prefix, page.lastPage).map((p) => withBase(base, p));
+const label = `${ui.page} ${page.currentPage}`;
 ---
-<html lang={config.lang}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{config.title}</title>
-  </head>
-  <body>
-    <h1>{config.title}</h1>
-  </body>
-</html>
+<ListLayout
+  title={label}
+  description={config.description}
+  breadcrumbs={[{ name: ui.home, href: '/' }, { name: label, href: `${prefix}/${page.currentPage}` }]}
+  heading={label}
+  posts={page.data}
+  currentPage={page.currentPage}
+  urls={urls}
+/>

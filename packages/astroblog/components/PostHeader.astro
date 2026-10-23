@@ -1,3 +1,52 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.PostHeader`. Post title (<h1>), description, category/tags badges,
+// author, dates and reading time, and the cover image.
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+import routes from 'virtual:astroblog/routes';
+import { t } from '../i18n/index';
+import { authorOf, formatDate, readingTime } from '../lib/posts';
+import { taxonomyPath, withBase } from '../lib/routes';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, cover, coverAlt, category, tags } = post.data;
+const base = import.meta.env.BASE_URL;
+const link = (key: 'category' | 'tag' | 'author', label: string) => {
+  const path = taxonomyPath(routes.paths, key, label);
+  return path ? withBase(base, path) : undefined;
+};
+const author = authorOf(post, config.author?.name);
+const authorHref = author ? link('author', author) : undefined;
+const categoryHref = link('category', category);
+const minutes = readingTime(post.body ?? '');
 ---
+<header class="mb-8 flex flex-col gap-4">
+  <div class="flex flex-wrap gap-2">
+    {categoryHref
+      ? <a href={categoryHref} class="badge badge-primary">{category}</a>
+      : <span class="badge badge-primary">{category}</span>}
+    {tags.map((tag) => {
+      const href = link('tag', tag);
+      return href ? <a href={href} class="badge badge-outline">{tag}</a> : <span class="badge badge-outline">{tag}</span>;
+    })}
+  </div>
+  <h1 class="text-3xl font-bold leading-tight sm:text-4xl">{title}</h1>
+  <p class="text-lg text-base-content/80">{description}</p>
+  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/70">
+    {author && (authorHref ? <a href={authorHref} class="link link-hover font-medium">{author}</a> : <span class="font-medium">{author}</span>)}
+    <span>{ui.publishedOn} <time datetime={pubDate.toISOString()}>{formatDate(pubDate, config.lang)}</time></span>
+    {updatedDate && <span>{ui.updatedOn} <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate, config.lang)}</time></span>}
+    <span>{t(ui.readingTime, { n: minutes })}</span>
+  </div>
+  {cover && (
+    <figure>
+      <Image src={cover} alt={coverAlt ?? ''} loading="eager" fetchpriority="high" class="rounded-box aspect-video w-full object-cover" />
+    </figure>
+  )}
+</header>

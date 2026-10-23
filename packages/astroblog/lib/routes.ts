@@ -1,5 +1,6 @@
 import type { Lang, ResolvedConfig, RouteKey } from '../schema/config';
 import { ROUTE_KEYS } from '../schema/config';
+import { slugify } from './posts';
 
 export interface ResolvedRoute {
   key: RouteKey;
@@ -102,4 +103,29 @@ export function stripBase(base: string, pathname: string): string {
   if (!b) return pathname;
   if (pathname === b || pathname === `${b}/`) return '/';
   return pathname.startsWith(`${b}/`) ? pathname.slice(b.length) : pathname;
+}
+
+/**
+ * Base-relative path of a taxonomy page (`/categoria/programacion-web`) from the section paths of
+ * `virtual:astroblog/routes`; undefined when that route is disabled or the label has no slug.
+ */
+export function taxonomyPath(
+  paths: Partial<Record<RouteKey, string>>,
+  key: 'category' | 'tag' | 'author',
+  label: string,
+): string | undefined {
+  const section = paths[key];
+  const s = slugify(label);
+  return section && s ? `${section}/${s}` : undefined;
+}
+
+/** Base-relative paths of pages 1..lastPage: page 1 is `first`, page n is `${prefix}/n`. */
+export function paginationPaths(first: string, prefix: string, lastPage: number): string[] {
+  const p = prefix.replace(/\/+$/, '');
+  return Array.from({ length: Math.max(1, lastPage) }, (_, i) => (i === 0 ? first : `${p}/${i + 1}`));
+}
+
+/** Base-relative prefix of the home listing pages 2..n (`/pagina` → `/pagina/2`). */
+export function homePagesPrefix(config: ResolvedConfig): string {
+  return `/${slug(config, 'page')}`;
 }

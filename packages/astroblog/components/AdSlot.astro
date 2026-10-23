@@ -1,0 +1,39 @@
+---
+// System component (not overridable). Manual AdSense unit: <ins class="adsbygoogle"> + push().
+// Renders nothing without `adsense` in the config or without `slot`; in `astro dev` it shows a
+// placeholder instead of a real ad. The wrapper reserves a minimum height to avoid layout shift.
+// Callers skip it for `noAds` posts (PostLayout does).
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+
+export interface Props {
+  slot?: string;
+  format?: 'auto' | 'fluid' | 'rectangle';
+  layout?: string;
+  /** Reserved height in px (default: the `.ad-slot` CSS default). */
+  minHeight?: number;
+}
+
+const { slot, format = 'auto', layout, minHeight } = Astro.props;
+const client = config.adsense?.client;
+const style = minHeight ? `--ad-min-height: ${minHeight}px` : undefined;
+const dev = import.meta.env.DEV;
+---
+{client && slot && (
+  dev ? (
+    <div class="ad-slot ad-placeholder not-prose my-8 flex items-center justify-center rounded-box border border-dashed border-base-300 text-sm text-base-content/60" style={style}>{ui.advertisement}</div>
+  ) : (
+    <div class="ad-slot not-prose my-8" style={style}>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={client}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-ad-layout={layout}
+        data-full-width-responsive={format === 'auto' ? 'true' : undefined}
+      ></ins>
+      <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  )
+)}

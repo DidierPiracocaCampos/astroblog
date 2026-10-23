@@ -1,3 +1,33 @@
 ---
-// stub: replaced in Task 12/15
+// Overridable: `components.Pagination`. daisyUI pagination (`join` of `btn`s): previous, page numbers, next.
+// Renders nothing with a single page.
+import ui from 'virtual:astroblog/ui';
+
+export interface Props {
+  /** 1-based number of the current page. */
+  currentPage: number;
+  /** Href of every page (already prefixed with `base`): `urls[0]` is page 1. */
+  urls: string[];
+}
+
+const { currentPage, urls } = Astro.props;
+const prev = currentPage > 1 ? urls[currentPage - 2] : undefined;
+const next = currentPage < urls.length ? urls[currentPage] : undefined;
 ---
+{urls.length > 1 && (
+  <nav class="mt-10 flex justify-center" aria-label={ui.page}>
+    <div class="join">
+      {prev
+        ? <a class="join-item btn" href={prev} rel="prev" aria-label={ui.previous}>«</a>
+        : <span class="join-item btn btn-disabled" aria-hidden="true">«</span>}
+      {urls.map((href, i) =>
+        i + 1 === currentPage
+          ? <a class="join-item btn btn-active" href={href} aria-current="page" aria-label={`${ui.page} ${i + 1}`}>{i + 1}</a>
+          : <a class="join-item btn" href={href} aria-label={`${ui.page} ${i + 1}`}>{i + 1}</a>,
+      )}
+      {next
+        ? <a class="join-item btn" href={next} rel="next" aria-label={ui.next}>»</a>
+        : <span class="join-item btn btn-disabled" aria-hidden="true">»</span>}
+    </div>
+  </nav>
+)}
