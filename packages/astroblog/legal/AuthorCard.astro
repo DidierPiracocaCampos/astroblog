@@ -1,0 +1,35 @@
+---
+// Author card shared by legal/<lang>/about.astro: daisyUI avatar (image or initial), name and website.
+// Name falls back to `owner.name`, then the site title.
+import { withBase } from '../lib/routes';
+import type { ResolvedConfig } from '../schema/config';
+
+export interface Props {
+  config: ResolvedConfig;
+}
+
+const { config } = Astro.props;
+const author = config.author;
+const name = author?.name ?? config.owner?.name ?? config.title;
+const avatar = author?.avatar ? withBase(import.meta.env.BASE_URL, author.avatar) : undefined;
+const initial = [...name.trim()][0]?.toUpperCase() ?? '';
+---
+<div class="not-prose my-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+  {avatar ? (
+    <div class="avatar">
+      <div class="w-24 rounded-full">
+        <img src={avatar} alt="" width="96" height="96" />
+      </div>
+    </div>
+  ) : (
+    <div class="avatar avatar-placeholder">
+      <div class="bg-neutral text-neutral-content w-24 rounded-full">
+        <span class="text-3xl" aria-hidden="true">{initial}</span>
+      </div>
+    </div>
+  )}
+  <div class="flex flex-col gap-1">
+    <span class="text-xl font-semibold">{name}</span>
+    {author?.url && <a href={author.url} class="link link-primary text-sm" rel="author noopener">{author.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>}
+  </div>
+</div>

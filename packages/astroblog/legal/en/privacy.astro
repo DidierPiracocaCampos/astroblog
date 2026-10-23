@@ -33,7 +33,7 @@ const site = Astro.site ? new URL(base, Astro.site).href : undefined;
 
 <h2>Data we process</h2>
 <ul>
-  <li><strong>Data you give us</strong>: if you write to us by email or through the contact form, we process your name, email address and the content of your message.</li>
+  <li><strong>Data you give us</strong>: if you write to us by email{config.contact?.formEndpoint && ' or through the contact form'}, we process your name, email address and the content of your message.</li>
   <li><strong>Technical data</strong>: the hosting provider may log technical connection data (IP address, browser, date and time of the visit) to serve the site and protect it from abuse.</li>
   <li><strong>Cookies and similar technologies</strong>: according to your consent choices{cookiesHref && <>; see the <a href={cookiesHref}>cookie policy</a></>}.</li>
 </ul>
@@ -71,8 +71,9 @@ const site = Astro.site ? new URL(base, Astro.site).href : undefined;
   <section>
     <h2>Analytics: Google Analytics</h2>
     <p>
-      We use Google Analytics 4 to obtain aggregate usage statistics (pages visited, visit duration, device type). It is
-      only enabled if you accept statistics cookies. More information in
+      We use Google Analytics 4 to obtain aggregate usage statistics (pages visited, visit duration, device type). Its cookies
+      are only set if you accept statistics cookies; without your consent, Google may receive cookieless, aggregated
+      measurement signals (Google Consent Mode). More information in
       <a href="https://policies.google.com/privacy" rel="noopener">Google’s privacy policy</a>; you can also install the
       <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">Google Analytics opt-out browser add-on</a>.
     </p>

@@ -33,7 +33,13 @@ describe('institutional and legal pages', () => {
     expect(html).toContain('Ana Pérez SL');
     expect(html).toContain(`<h1>${es.privacy}</h1>`);
     expect(html).toContain(es.updatedOn);
+    // GA4 loads under Consent Mode: only its cookies wait for consent, cookieless pings may not.
+    expect(html).toContain('sin cookies');
+    expect(html).toContain('mediante el formulario de contacto');
   });
+
+  it('privacy mentions the contact form only when an endpoint is set', async () =>
+    expect(await en.read('privacy/index.html')).not.toContain('contact form'));
 
   it('privacy omits ads section without adsense', async () =>
     expect(await en.read('privacy/index.html')).not.toContain('policies.google.com/technologies/ads'));
@@ -79,7 +85,7 @@ describe('institutional and legal pages', () => {
 
   it('contact has no form without endpoint', async () => {
     const html = await en.read('contact/index.html');
-    expect(html).not.toContain('<form method="POST"'); // the search dialog has its own <form method="dialog">
+    expect(html).not.toMatch(/<form[^>]*method="POST"/i); // the search dialog has its own <form method="dialog">
     expect(html).toContain('href="mailto:jane@example.com"');
   });
 
