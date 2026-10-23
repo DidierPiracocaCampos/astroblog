@@ -1,0 +1,125 @@
+---
+// Template: privacy policy (en). Language-specific prose (exempt from `ui`, see spec §8).
+import routes from 'virtual:astroblog/routes';
+import CookieSettingsLink from '../../components/CookieSettingsLink.astro';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const cookiesHref = routes.paths.cookies ? withBase(base, routes.paths.cookies) : undefined;
+const contactHref = routes.paths.contact ? withBase(base, routes.paths.contact) : undefined;
+const site = Astro.site ? new URL(base, Astro.site).href : undefined;
+---
+<Updated date={updated} />
+
+<p>
+  At {config.title}{site && <> (<a href={site}>{site}</a>)</>} we respect your privacy. This policy explains which
+  personal data is processed when you visit the site, for what purposes, for how long, and what rights you have.
+</p>
+
+<h2>Data controller</h2>
+<p>
+  The data controller is {c.owner}{c.country && <>, based in {c.country}</>}.
+  {c.email
+    ? <>You can write to <a href={`mailto:${c.email}`}>{c.email}</a> about anything related to your data.</>
+    : contactHref && <>You can reach us through the <a href={contactHref}>contact page</a>.</>}
+</p>
+
+<h2>Data we process</h2>
+<ul>
+  <li><strong>Data you give us</strong>: if you write to us by email or through the contact form, we process your name, email address and the content of your message.</li>
+  <li><strong>Technical data</strong>: the hosting provider may log technical connection data (IP address, browser, date and time of the visit) to serve the site and protect it from abuse.</li>
+  <li><strong>Cookies and similar technologies</strong>: according to your consent choices{cookiesHref && <>; see the <a href={cookiesHref}>cookie policy</a></>}.</li>
+</ul>
+
+<h2>Purposes and legal basis</h2>
+<ul>
+  <li>Answering your messages: your consent and our legitimate interest in replying.</li>
+  <li>Keeping the site running and secure: our legitimate interest.</li>
+  {c.ga4 && <li>Measuring audience in aggregate: your consent.</li>}
+  {c.ads && <li>Showing advertising, personalised or not according to your choice: your consent where required.</li>}
+  {c.giscus && <li>Enabling comments on posts: your consent.</li>}
+</ul>
+
+{c.ads && (
+  <section>
+    <h2>Google advertising</h2>
+    <p>
+      This site shows Google AdSense ads. Google, as a third-party vendor, uses cookies to serve ads based on your prior
+      visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads
+      to you based on your browsing.
+    </p>
+    <p>
+      You can learn how Google uses data from sites that use its services at
+      <a href="https://policies.google.com/technologies/ads" rel="noopener">https://policies.google.com/technologies/ads</a>.
+      You can opt out of personalised advertising in
+      <a href="https://adssettings.google.com" rel="noopener">Google Ads Settings</a>
+      (https://adssettings.google.com) or, for other vendors, at
+      <a href="https://www.aboutads.info/choices/" rel="noopener">www.aboutads.info</a>. If you opt out you will still see
+      ads, but they will not be personalised.
+    </p>
+  </section>
+)}
+
+{c.ga4 && (
+  <section>
+    <h2>Analytics: Google Analytics</h2>
+    <p>
+      We use Google Analytics 4 to obtain aggregate usage statistics (pages visited, visit duration, device type). It is
+      only enabled if you accept statistics cookies. More information in
+      <a href="https://policies.google.com/privacy" rel="noopener">Google’s privacy policy</a>; you can also install the
+      <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">Google Analytics opt-out browser add-on</a>.
+    </p>
+  </section>
+)}
+
+{c.giscus && (
+  <section>
+    <h2>Comments: Giscus and GitHub</h2>
+    <p>
+      Comments are handled by Giscus, which stores them in GitHub Discussions. To comment you must sign in with your
+      GitHub account; your username and comment will be public. The widget is only loaded with your consent. See the
+      <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a>.
+    </p>
+  </section>
+)}
+
+<h2>Consent</h2>
+<p>
+  We manage your consent to cookies and similar technologies with {c.cmp}. Non-essential cookies stay disabled until
+  you accept them, and you can change or withdraw your consent at any time: <CookieSettingsLink />.
+</p>
+
+<h2>Retention</h2>
+<p>
+  We keep the messages you send us for as long as needed to handle them and, afterwards, for any period required by
+  law. Cookie data is kept for the periods described in the cookie policy or until you delete it from your browser.
+</p>
+
+<h2>Recipients and international transfers</h2>
+<p>
+  We do not sell your data. Service providers working for us (hosting{c.ads && ', advertising'}{c.ga4 && ', analytics'}{c.giscus && ', comments'})
+  may access it, and some of them may be located outside the European Economic Area. In that case, transfers rely on
+  the safeguards provided by law, such as adequacy decisions or standard contractual clauses.
+</p>
+
+<h2>Your rights</h2>
+<p>
+  Under the General Data Protection Regulation (GDPR) and applicable local laws, you can request access to,
+  rectification or erasure of your data, restriction of or objection to its processing, and data portability, and you
+  can withdraw your consent at any time without affecting the lawfulness of prior processing.
+  {c.email && <>To exercise these rights, write to <a href={`mailto:${c.email}`}>{c.email}</a>.</>}
+  You also have the right to lodge a complaint with the competent data protection authority.
+</p>
+
+<h2>Children</h2>
+<p>This site is not directed at children under 16 and we do not knowingly collect their data.</p>
+
+<h2>Changes to this policy</h2>
+<p>We may update this policy to reflect changes to the site or to the law; the date of the latest update is shown at the top of this page.</p>

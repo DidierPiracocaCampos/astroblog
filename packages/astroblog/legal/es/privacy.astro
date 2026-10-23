@@ -1,0 +1,128 @@
+---
+// Plantilla: política de privacidad (es). Prosa propia del idioma (exenta de `ui`, ver spec §8).
+import routes from 'virtual:astroblog/routes';
+import CookieSettingsLink from '../../components/CookieSettingsLink.astro';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const cookiesHref = routes.paths.cookies ? withBase(base, routes.paths.cookies) : undefined;
+const contactHref = routes.paths.contact ? withBase(base, routes.paths.contact) : undefined;
+const site = Astro.site ? new URL(base, Astro.site).href : undefined;
+---
+<Updated date={updated} />
+
+<p>
+  En {config.title}{site && <> (<a href={site}>{site}</a>)</>} respetamos tu privacidad. Esta política explica qué datos
+  personales se tratan cuando visitas el sitio, con qué finalidad, durante cuánto tiempo y qué derechos tienes.
+</p>
+
+<h2>Responsable del tratamiento</h2>
+<p>
+  El responsable del tratamiento es {c.owner}{c.country && <>, con sede en {c.country}</>}.
+  {c.email
+    ? <>Puedes escribir a <a href={`mailto:${c.email}`}>{c.email}</a> para cualquier cuestión relacionada con tus datos.</>
+    : contactHref && <>Puedes contactar con nosotros a través de la <a href={contactHref}>página de contacto</a>.</>}
+</p>
+
+<h2>Datos que tratamos</h2>
+<ul>
+  <li><strong>Datos que nos facilitas</strong>: si nos escribes por correo electrónico o mediante el formulario de contacto, tratamos tu nombre, tu dirección de correo y el contenido de tu mensaje.</li>
+  <li><strong>Datos técnicos</strong>: el proveedor de alojamiento puede registrar datos técnicos de la conexión (dirección IP, navegador, fecha y hora de la visita) para servir el sitio y protegerlo frente a abusos.</li>
+  <li><strong>Cookies y tecnologías similares</strong>: según tus preferencias de consentimiento{cookiesHref && <>; consulta la <a href={cookiesHref}>política de cookies</a></>}.</li>
+</ul>
+
+<h2>Finalidades y base jurídica</h2>
+<ul>
+  <li>Responder a tus consultas: tu consentimiento y nuestro interés legítimo en atenderlas.</li>
+  <li>Mantener el sitio en funcionamiento y seguro: nuestro interés legítimo.</li>
+  {c.ga4 && <li>Medir la audiencia del sitio de forma agregada: tu consentimiento.</li>}
+  {c.ads && <li>Mostrar publicidad, personalizada o no según tu elección: tu consentimiento cuando sea necesario.</li>}
+  {c.giscus && <li>Permitir comentarios en los artículos: tu consentimiento.</li>}
+</ul>
+
+{c.ads && (
+  <section>
+    <h2>Publicidad de Google</h2>
+    <p>
+      Este sitio muestra anuncios de Google AdSense. Google, como proveedor externo, utiliza cookies para publicar
+      anuncios basados en tus visitas anteriores a este y a otros sitios web. El uso de cookies publicitarias permite a
+      Google y a sus socios mostrarte anuncios en función de tu navegación.
+    </p>
+    <p>
+      Puedes consultar cómo utiliza Google los datos de los sitios que usan sus servicios en
+      <a href="https://policies.google.com/technologies/ads" rel="noopener">https://policies.google.com/technologies/ads</a>.
+      Puedes desactivar la publicidad personalizada en la
+      <a href="https://adssettings.google.com" rel="noopener">configuración de anuncios de Google</a>
+      (https://adssettings.google.com) o, para otros proveedores, en
+      <a href="https://www.aboutads.info/choices/" rel="noopener">www.aboutads.info</a>. Si la desactivas, seguirás
+      viendo anuncios, pero no estarán personalizados.
+    </p>
+  </section>
+)}
+
+{c.ga4 && (
+  <section>
+    <h2>Analítica: Google Analytics</h2>
+    <p>
+      Utilizamos Google Analytics 4 para obtener estadísticas agregadas de uso (páginas visitadas, duración de la visita,
+      tipo de dispositivo). Solo se activa si aceptas las cookies de estadística. Más información en la
+      <a href="https://policies.google.com/privacy" rel="noopener">política de privacidad de Google</a>; también puedes
+      instalar el <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener">complemento de inhabilitación de Google Analytics</a>.
+    </p>
+  </section>
+)}
+
+{c.giscus && (
+  <section>
+    <h2>Comentarios: Giscus y GitHub</h2>
+    <p>
+      Los comentarios se gestionan con Giscus, que los almacena en GitHub Discussions. Para comentar debes iniciar sesión
+      con tu cuenta de GitHub; tu nombre de usuario y tu comentario serán públicos. El widget solo se carga si das tu
+      consentimiento. Consulta la
+      <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">declaración de privacidad de GitHub</a>.
+    </p>
+  </section>
+)}
+
+<h2>Consentimiento</h2>
+<p>
+  Gestionamos tu consentimiento para cookies y tecnologías similares con {c.cmp}. Las cookies no necesarias permanecen
+  desactivadas hasta que las aceptas, y puedes cambiar o retirar tu consentimiento en cualquier momento:
+  <CookieSettingsLink />.
+</p>
+
+<h2>Conservación</h2>
+<p>
+  Conservamos los mensajes que nos envías el tiempo necesario para atenderlos y, después, durante los plazos que exija la
+  ley. Los datos de cookies se conservan durante el plazo indicado en la política de cookies o hasta que las elimines de
+  tu navegador.
+</p>
+
+<h2>Destinatarios y transferencias internacionales</h2>
+<p>
+  No vendemos tus datos. Pueden acceder a ellos los proveedores que nos prestan servicios (alojamiento{c.ads && ', publicidad'}{c.ga4 && ', analítica'}{c.giscus && ', comentarios'}),
+  algunos de los cuales pueden estar fuera del Espacio Económico Europeo. En ese caso, las transferencias se amparan en
+  los mecanismos previstos por la normativa, como decisiones de adecuación o cláusulas contractuales tipo.
+</p>
+
+<h2>Tus derechos</h2>
+<p>
+  De acuerdo con el Reglamento General de Protección de Datos (RGPD) y la legislación local aplicable, puedes solicitar
+  el acceso, la rectificación o la supresión de tus datos, la limitación u oposición a su tratamiento y su portabilidad,
+  así como retirar tu consentimiento en cualquier momento sin que ello afecte a la licitud del tratamiento previo.
+  {c.email && <>Para ejercerlos, escribe a <a href={`mailto:${c.email}`}>{c.email}</a>.</>}
+  También tienes derecho a presentar una reclamación ante la autoridad de protección de datos competente.
+</p>
+
+<h2>Menores</h2>
+<p>Este sitio no está dirigido a menores de 16 años y no recopilamos conscientemente sus datos.</p>
+
+<h2>Cambios en esta política</h2>
+<p>Podemos actualizar esta política para reflejar cambios en el sitio o en la normativa; la fecha de la última actualización figura al principio de esta página.</p>

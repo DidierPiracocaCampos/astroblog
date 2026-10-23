@@ -1,0 +1,13 @@
+---
+// "Last updated" line of the legal templates (shared chrome: label from ui, date in the site language).
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+import { formatDate } from '../lib/posts';
+
+export interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+---
+<p class="text-sm text-base-content/70">{ui.updatedOn} <time datetime={date.toISOString()}>{formatDate(date, config.lang)}</time></p>

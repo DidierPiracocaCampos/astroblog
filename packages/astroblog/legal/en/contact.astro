@@ -1,0 +1,41 @@
+---
+// Template: contact (en). Email (mailto:) and, with `contact.formEndpoint`, a POST form with a `_gotcha` honeypot.
+import ui from 'virtual:astroblog/ui';
+import routes from 'virtual:astroblog/routes';
+import { withBase } from '../../lib/routes';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config } = Astro.props;
+const email = config.contact?.email ?? config.author?.email ?? config.owner?.email;
+const endpoint = config.contact?.formEndpoint;
+const base = import.meta.env.BASE_URL;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+---
+<p>Have a question, a suggestion or found a mistake? We would love to hear from you.</p>
+
+{email && <p>You can write to us directly at <a href={`mailto:${email}`}>{email}</a>.</p>}
+
+{endpoint && (
+  <section>
+    {email && <p>Or, if you prefer, use this form:</p>}
+    <form method="POST" action={endpoint} class="not-prose max-w-xl">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{ui.contact}</legend>
+        <label class="label" for="contact-name">{ui.contactFormName}</label>
+        <input id="contact-name" name="name" type="text" class="input w-full" autocomplete="name" required />
+        <label class="label" for="contact-email">{ui.contactFormEmail}</label>
+        <input id="contact-email" name="email" type="email" class="input w-full" autocomplete="email" required />
+        <label class="label" for="contact-message">{ui.contactFormMessage}</label>
+        <textarea id="contact-message" name="message" class="textarea w-full" rows="6" required></textarea>
+        <div class="sr-only" aria-hidden="true">
+          <input name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <button type="submit" class="btn btn-primary mt-4 w-fit">{ui.contactFormSend}</button>
+      </fieldset>
+    </form>
+  </section>
+)}
+
+<p>We usually reply within a few days. The data you send will only be used to answer you{privacyHref ? <>; see the <a href={privacyHref}>privacy policy</a>.</> : '.'}</p>

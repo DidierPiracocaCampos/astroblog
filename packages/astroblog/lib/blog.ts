@@ -29,6 +29,29 @@ export function loadPosts(): Promise<BlogPost[]> {
   return (cached ??= load());
 }
 
+export type PageEntry = CollectionEntry<'pages'>;
+
+let cachedPages: Promise<PageEntry[]> | undefined;
+
+async function loadPagesUncached(): Promise<PageEntry[]> {
+  try {
+    // The `pages` collection is optional: a project without it gets [] (at most one Astro warning).
+    return (await getCollection('pages')) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The user's entry of the optional `pages` collection with this id (e.g. `privacidad`), if any.
+ * Reads the whole collection once per build instead of `getEntry()`, which logs a warning for
+ * every missing entry; in dev it is re-read on each call.
+ */
+export async function findPage(id: string): Promise<PageEntry | undefined> {
+  const pages = import.meta.env.DEV ? loadPagesUncached() : (cachedPages ??= loadPagesUncached());
+  return (await pages).find((p) => p.id === id);
+}
+
 const warn = (message: string) => console.warn(`[astroblog] ${message}`);
 
 /**

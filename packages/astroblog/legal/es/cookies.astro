@@ -1,0 +1,84 @@
+---
+// Plantilla: política de cookies (es). Tabla de categorías según los servicios activos + CookieSettingsLink.
+import routes from 'virtual:astroblog/routes';
+import CookieSettingsLink from '../../components/CookieSettingsLink.astro';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+
+const rows = [
+  {
+    id: 'necessary', name: 'Necesarias',
+    purpose: 'Permiten el funcionamiento básico del sitio y recuerdan tus preferencias de consentimiento.',
+    providers: `Este sitio; ${c.cmp}`, consent: 'No (exentas)',
+  },
+  {
+    id: 'preferences', name: 'Preferencias',
+    purpose: 'Recuerdan opciones de visualización, como el tema claro u oscuro (almacenamiento local del navegador).',
+    providers: 'Este sitio', consent: 'No (las fijas tú)',
+  },
+  ...(c.ga4 ? [{
+    id: 'statistics', name: 'Estadísticas',
+    purpose: 'Miden de forma agregada cómo se usa el sitio (por ejemplo, las cookies _ga y _ga_*).',
+    providers: 'Google Analytics (Google)', consent: 'Sí',
+  }] : []),
+  ...(c.ads ? [{
+    id: 'marketing', name: 'Marketing',
+    purpose: 'Muestran anuncios, limitan su repetición y, si lo aceptas, los personalizan (por ejemplo, __gads, __gpi o IDE).',
+    providers: 'Google AdSense y sus socios', consent: 'Sí',
+  }] : []),
+];
+---
+<Updated date={updated} />
+
+<p>
+  Las cookies son pequeños archivos que un sitio web guarda en tu navegador. Junto con tecnologías similares, como el
+  almacenamiento local, permiten que el sitio funcione, recordar tus preferencias y{c.ga4 || c.ads ? ', con tu consentimiento, medir la audiencia o mostrar publicidad' : ' mejorar tu experiencia'}.
+</p>
+
+<h2>Cookies que utilizamos</h2>
+<div class="not-prose overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr><th scope="col">Categoría</th><th scope="col">Finalidad</th><th scope="col">Proveedor</th><th scope="col">Requiere consentimiento</th></tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr data-cookie-category={r.id}><th scope="row">{r.name}</th><td>{r.purpose}</td><td>{r.providers}</td><td>{r.consent}</td></tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+{c.ads && (
+  <p>
+    Google utiliza cookies publicitarias para mostrar anuncios basados en tus visitas a este y otros sitios. Más
+    información en <a href="https://policies.google.com/technologies/ads" rel="noopener">https://policies.google.com/technologies/ads</a>;
+    puedes desactivar la publicidad personalizada en la <a href="https://adssettings.google.com" rel="noopener">configuración de anuncios de Google</a>.
+  </p>
+)}
+{c.giscus && (
+  <p>
+    Los comentarios (Giscus, alojado en GitHub) solo se cargan cuando das tu consentimiento; al iniciar sesión con
+    GitHub se aplican las cookies de GitHub.
+  </p>
+)}
+
+<h2>Cómo gestionar las cookies</h2>
+<p>
+  Gestionamos el consentimiento con {c.cmp}. Las cookies que requieren consentimiento no se activan hasta que las
+  aceptas, y puedes cambiar tu elección en cualquier momento: <CookieSettingsLink />.
+</p>
+<p>
+  También puedes bloquear o eliminar las cookies desde la configuración de tu navegador; si bloqueas las necesarias,
+  algunas partes del sitio podrían no funcionar correctamente.
+</p>
+{privacyHref && <p>Para saber cómo tratamos tus datos personales, consulta la <a href={privacyHref}>política de privacidad</a>.</p>}

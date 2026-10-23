@@ -1,0 +1,87 @@
+---
+// Template: terms and conditions (en).
+import routes from 'virtual:astroblog/routes';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+---
+<Updated date={updated} />
+
+<p>
+  These terms govern the use of {config.title}, owned by {c.owner}. By browsing the site you accept these terms; if
+  you do not agree with them, please do not use it.
+</p>
+
+<h2>Use of the site</h2>
+<p>
+  You may read and share the content for personal, non-commercial use. You may not use the site in a way that could
+  damage or overload it or prevent others from using it, nor attempt to access non-public areas.
+</p>
+
+<h2>Intellectual property</h2>
+<p>
+  Unless stated otherwise, texts, images and other content belong to {c.owner} or are used with their authors’
+  permission. You may quote short excerpts with a link to the original source; any other reproduction requires prior
+  permission.
+</p>
+
+<h2>Informational content</h2>
+<p>
+  Posts are provided for information purposes. While we take care to keep them accurate, they may contain errors or
+  become outdated, and they are not a substitute for professional advice. You use the information at your own risk.
+</p>
+
+<h2>External links</h2>
+<p>
+  The site may link to third-party pages. We do not control their content or privacy practices and are not
+  responsible for them.
+</p>
+
+{c.ads && (
+  <section>
+    <h2>Advertising</h2>
+    <p>
+      The site is partly funded by ads served by Google AdSense. Advertisers are responsible for their ads; showing them
+      does not imply that we endorse their products or services.
+    </p>
+  </section>
+)}
+
+{c.giscus && (
+  <section>
+    <h2>Comments</h2>
+    <p>
+      When commenting you agree to be respectful and not to post unlawful, offensive or unsolicited promotional content.
+      We may moderate or remove comments that break these rules. Comments are published through GitHub and are also
+      subject to its terms of service.
+    </p>
+  </section>
+)}
+
+<h2>Privacy</h2>
+<p>
+  Personal data is handled as described in our
+  {privacyHref ? <a href={privacyHref}>privacy policy</a> : 'privacy policy'}.
+</p>
+
+<h2>Liability</h2>
+<p>
+  To the extent permitted by law, we are not liable for damages arising from the use of the site, service
+  interruptions or errors in the content.
+</p>
+
+<h2>Changes and governing law</h2>
+<p>
+  We may change these terms; the version in force is the one published on this page. These terms are governed by the
+  laws of {c.country ?? 'the owner’s country'}, without prejudice to any consumer protection rights you have under the
+  laws of your own country.
+  {c.email && <>For any questions, write to <a href={`mailto:${c.email}`}>{c.email}</a>.</>}
+</p>

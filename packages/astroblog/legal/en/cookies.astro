@@ -1,0 +1,84 @@
+---
+// Template: cookie policy (en). Category table for the active services + CookieSettingsLink.
+import routes from 'virtual:astroblog/routes';
+import CookieSettingsLink from '../../components/CookieSettingsLink.astro';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+
+const rows = [
+  {
+    id: 'necessary', name: 'Necessary',
+    purpose: 'Enable the basic operation of the site and remember your consent choices.',
+    providers: `This site; ${c.cmp}`, consent: 'No (exempt)',
+  },
+  {
+    id: 'preferences', name: 'Preferences',
+    purpose: 'Remember display options such as the light or dark theme (browser local storage).',
+    providers: 'This site', consent: 'No (set by you)',
+  },
+  ...(c.ga4 ? [{
+    id: 'statistics', name: 'Statistics',
+    purpose: 'Measure in aggregate how the site is used (for example, the _ga and _ga_* cookies).',
+    providers: 'Google Analytics (Google)', consent: 'Yes',
+  }] : []),
+  ...(c.ads ? [{
+    id: 'marketing', name: 'Marketing',
+    purpose: 'Serve ads, limit how often you see them and, if you agree, personalise them (for example, __gads, __gpi or IDE).',
+    providers: 'Google AdSense and its partners', consent: 'Yes',
+  }] : []),
+];
+---
+<Updated date={updated} />
+
+<p>
+  Cookies are small files a website stores in your browser. Together with similar technologies such as local storage,
+  they make the site work, remember your preferences and{c.ga4 || c.ads ? ', with your consent, measure audience or show advertising' : ' improve your experience'}.
+</p>
+
+<h2>Cookies we use</h2>
+<div class="not-prose overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr><th scope="col">Category</th><th scope="col">Purpose</th><th scope="col">Provider</th><th scope="col">Consent required</th></tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr data-cookie-category={r.id}><th scope="row">{r.name}</th><td>{r.purpose}</td><td>{r.providers}</td><td>{r.consent}</td></tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+{c.ads && (
+  <p>
+    Google uses advertising cookies to serve ads based on your visits to this and other sites. More information at
+    <a href="https://policies.google.com/technologies/ads" rel="noopener">https://policies.google.com/technologies/ads</a>;
+    you can opt out of personalised advertising in <a href="https://adssettings.google.com" rel="noopener">Google Ads Settings</a>.
+  </p>
+)}
+{c.giscus && (
+  <p>
+    Comments (Giscus, hosted on GitHub) are only loaded once you consent; signing in with GitHub is subject to
+    GitHub’s cookies.
+  </p>
+)}
+
+<h2>Managing cookies</h2>
+<p>
+  We manage consent with {c.cmp}. Cookies that require consent are not set until you accept them, and you can change
+  your choice at any time: <CookieSettingsLink />.
+</p>
+<p>
+  You can also block or delete cookies in your browser settings; if you block necessary cookies, parts of the site may
+  not work properly.
+</p>
+{privacyHref && <p>To learn how we handle your personal data, see the <a href={privacyHref}>privacy policy</a>.</p>}

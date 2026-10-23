@@ -1,0 +1,60 @@
+---
+// Plantilla: aviso legal (es). Datos identificativos del titular y condiciones generales.
+import routes from 'virtual:astroblog/routes';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const site = Astro.site ? new URL(base, Astro.site).href : undefined;
+const termsHref = routes.paths.terms ? withBase(base, routes.paths.terms) : undefined;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+const contactHref = routes.paths.contact ? withBase(base, routes.paths.contact) : undefined;
+---
+<Updated date={updated} />
+
+<h2>Datos identificativos</h2>
+<ul>
+  <li><strong>Titular</strong>: {c.owner}</li>
+  {c.country && <li><strong>País</strong>: {c.country}</li>}
+  {c.email && <li><strong>Correo electrónico</strong>: <a href={`mailto:${c.email}`}>{c.email}</a></li>}
+  {!c.email && contactHref && <li><strong>Contacto</strong>: <a href={contactHref}>formulario de contacto</a></li>}
+  <li><strong>Sitio web</strong>: {site ? <a href={site}>{site}</a> : config.title}</li>
+</ul>
+
+<h2>Objeto</h2>
+<p>
+  {config.title} es un blog que publica artículos con fines informativos. Este aviso legal regula el acceso y el uso del
+  sitio; el acceso implica la aceptación de sus condiciones{termsHref && <>, que se completan con los <a href={termsHref}>términos y condiciones</a></>}.
+</p>
+
+<h2>Propiedad intelectual e industrial</h2>
+<p>
+  Los contenidos del sitio (textos, imágenes, logotipos y diseño) pertenecen a {c.owner} o a sus respectivos autores y
+  están protegidos por la normativa de propiedad intelectual. Queda prohibida su reproducción con fines comerciales sin
+  autorización expresa.
+</p>
+
+<h2>Responsabilidad</h2>
+<p>
+  El titular no garantiza la ausencia de errores en los contenidos ni la disponibilidad continua del sitio, y no se hace
+  responsable de los daños derivados de su uso ni del contenido de los sitios de terceros enlazados.
+  {c.ads && 'Los anuncios mostrados son responsabilidad de sus anunciantes.'}
+</p>
+
+<h2>Protección de datos</h2>
+<p>
+  El tratamiento de datos personales se describe en la
+  {privacyHref ? <a href={privacyHref}>política de privacidad</a> : 'política de privacidad'}.
+</p>
+
+<h2>Legislación aplicable</h2>
+<p>
+  Este aviso se rige por la legislación {c.country ? <>de {c.country}</> : 'del país del titular'}. Para cualquier
+  controversia, las partes se someten a los juzgados y tribunales que correspondan conforme a dicha legislación.
+</p>

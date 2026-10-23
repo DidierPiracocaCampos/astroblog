@@ -69,6 +69,15 @@ importers:
         specifier: ^7.4.2
         version: 7.4.2(@types/node@24.19.2)(jiti@2.7.0)(yaml@2.9.1)
 
+  packages/astroblog/test/fixtures/minimal-legal:
+    dependencies:
+      '@didierp/astroblog':
+        specifier: workspace:*
+        version: link:../../..
+      astro:
+        specifier: ^7.4.2
+        version: 7.4.2(@types/node@24.19.2)(jiti@2.7.0)(yaml@2.9.1)
+
   packages/astroblog/test/fixtures/nosite:
     dependencies:
       '@didierp/astroblog':

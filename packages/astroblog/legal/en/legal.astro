@@ -1,0 +1,60 @@
+---
+// Template: legal notice (en). Owner identification and general conditions.
+import routes from 'virtual:astroblog/routes';
+import { legalContext } from '../../lib/legal';
+import { withBase } from '../../lib/routes';
+import Updated from '../Updated.astro';
+import type { LegalTemplateProps } from '../types';
+
+export type Props = LegalTemplateProps;
+
+const { config, updated } = Astro.props;
+const c = legalContext(config);
+const base = import.meta.env.BASE_URL;
+const site = Astro.site ? new URL(base, Astro.site).href : undefined;
+const termsHref = routes.paths.terms ? withBase(base, routes.paths.terms) : undefined;
+const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) : undefined;
+const contactHref = routes.paths.contact ? withBase(base, routes.paths.contact) : undefined;
+---
+<Updated date={updated} />
+
+<h2>Identification</h2>
+<ul>
+  <li><strong>Owner</strong>: {c.owner}</li>
+  {c.country && <li><strong>Country</strong>: {c.country}</li>}
+  {c.email && <li><strong>Email</strong>: <a href={`mailto:${c.email}`}>{c.email}</a></li>}
+  {!c.email && contactHref && <li><strong>Contact</strong>: <a href={contactHref}>contact form</a></li>}
+  <li><strong>Website</strong>: {site ? <a href={site}>{site}</a> : config.title}</li>
+</ul>
+
+<h2>Purpose</h2>
+<p>
+  {config.title} is a blog that publishes posts for information purposes. This legal notice governs access to and use
+  of the site; accessing it implies accepting these conditions{termsHref && <>, which are completed by the <a href={termsHref}>terms and conditions</a></>}.
+</p>
+
+<h2>Intellectual property</h2>
+<p>
+  The site’s content (texts, images, logos and design) belongs to {c.owner} or to its respective authors and is
+  protected by intellectual property law. Reproducing it for commercial purposes without express permission is not
+  allowed.
+</p>
+
+<h2>Liability</h2>
+<p>
+  The owner does not guarantee that the content is free of errors or that the site will be continuously available, and
+  is not liable for damages arising from its use or for the content of linked third-party sites.
+  {c.ads && 'Advertisers are responsible for the ads shown.'}
+</p>
+
+<h2>Data protection</h2>
+<p>
+  Personal data is handled as described in the
+  {privacyHref ? <a href={privacyHref}>privacy policy</a> : 'privacy policy'}.
+</p>
+
+<h2>Governing law</h2>
+<p>
+  This notice is governed by the laws of {c.country ?? 'the owner’s country'}. Any dispute will be submitted to the
+  courts that have jurisdiction under those laws.
+</p>
