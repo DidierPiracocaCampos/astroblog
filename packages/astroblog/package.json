@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "description": "Integración de Astro que convierte un proyecto en un blog estático completo, listo para AdSense y Cloudflare Pages.",
   "keywords": ["astro-integration", "astro", "blog", "adsense", "daisyui", "withastro"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/didierp/astroblog.git",
+    "directory": "packages/astroblog"
+  },
+  "homepage": "https://github.com/didierp/astroblog/tree/main/packages/astroblog#readme",
+  "bugs": {
+    "url": "https://github.com/didierp/astroblog/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.23.0"
