@@ -126,6 +126,15 @@ export function buildVirtualModules(
   return { modules, customCss };
 }
 
+/**
+ * Rewrites the relative `import('./x')` types of the package's `virtual.d.ts` to absolute
+ * POSIX paths so the declarations resolve when injected into the project's `.astro/` dir.
+ */
+export function virtualTypes(source: string, pkgDir: URL): string {
+  const pkg = dirOf(pkgDir);
+  return source.replace(/import\((['"])\.\/([^'"]+)\1\)/g, (_m, q: string, rel: string) => `import(${q}${pkg}/${rel}${q})`);
+}
+
 export function astroblogVitePlugin(modules: Record<string, string>): VirtualModulesPlugin {
   return {
     name: 'astroblog:virtual-modules',

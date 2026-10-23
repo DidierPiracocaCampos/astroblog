@@ -1,6 +1,6 @@
 // Ambient declarations for the astroblog virtual modules.
-// Types are referenced with inline `import()` types relative to this file; Task 9 must
-// inject this file so those paths still resolve (or rewrite them to absolute paths).
+// Types are referenced with inline `import()` types relative to this file; the integration
+// injects it via `injectTypes` with those paths rewritten to absolute ones (`virtualTypes`).
 
 declare module 'virtual:astroblog/config' {
   const config: import('./schema/config').ResolvedConfig;
