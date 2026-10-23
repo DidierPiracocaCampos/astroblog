@@ -14,9 +14,9 @@ export type PostLike = {
 export function slugify(s: string): string {
   return s
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
 }
 
@@ -48,19 +48,38 @@ export function relatedPosts<T extends PostLike>(post: T, all: T[], limit = 3): 
     .map((x) => x.o);
 }
 
+const normalizeLabel = (s: string) =>
+  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 export function groupByTaxonomy<T extends PostLike>(
   posts: T[],
   field: 'category' | 'tags' | 'author',
+  warn?: (message: string) => void,
 ): Map<string, { label: string; posts: T[] }> {
   const groups = new Map<string, { label: string; posts: T[] }>();
+  const warned = new Set<string>();
+  const warnOnce = (key: string, message: string) => {
+    if (warned.has(key)) return;
+    warned.add(key);
+    warn?.(message);
+  };
   for (const post of posts) {
     const raw = post.data[field];
     const labels = Array.isArray(raw) ? raw : raw ? [raw] : [];
     for (const label of labels) {
       const slug = slugify(label);
-      if (!slug) continue;
+      if (!slug) {
+        warnOnce(`empty|${label}`, `Skipping ${field} "${label}" in post "${post.id}": it has no letters or digits to build a slug from.`);
+        continue;
+      }
       let g = groups.get(slug);
       if (!g) groups.set(slug, (g = { label, posts: [] }));
+      else if (normalizeLabel(g.label) !== normalizeLabel(label)) {
+        warnOnce(
+          `${slug}|${label}`,
+          `${field} labels "${g.label}" and "${label}" both produce the slug "${slug}" and were merged under "${g.label}".`,
+        );
+      }
       if (!g.posts.includes(post)) g.posts.push(post);
     }
   }

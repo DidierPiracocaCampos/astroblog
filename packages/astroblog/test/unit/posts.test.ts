@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   slugify,
   publishedPosts,
@@ -28,6 +28,11 @@ describe('slugify', () => {
   it('strips diacritics, lowercases and joins with dashes', () => {
     expect(slugify('Programación Web')).toBe('programacion-web');
     expect(slugify('  Ñandú & Co. ')).toBe('nandu-co');
+  });
+  it('keeps non-Latin letters and digits', () => {
+    expect(slugify('日本語')).toBe('日本語');
+    expect(slugify('Привет')).toBe('привет');
+    expect(slugify('!!!')).toBe('');
   });
   it('collapses runs of symbols and trims dashes', () => {
     expect(slugify('--Hello___World!!')).toBe('hello-world');
@@ -111,8 +116,31 @@ describe('groupByTaxonomy', () => {
     expect(g.get('jose-nunez')!.label).toBe('José Núñez');
     expect(g.get('jose-nunez')!.posts).toEqual([a, c]);
   });
-  it('skips values whose slug is empty', () => {
-    const g = groupByTaxonomy([p({ category: '!!!' })], 'category');
+  it('skips values whose slug is empty and warns once', () => {
+    const warn = vi.fn();
+    const g = groupByTaxonomy([p({ category: '!!!' }, 'a'), p({ category: '!!!' }, 'b')], 'category', warn);
     expect(g.size).toBe(0);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('!!!');
+    expect(warn.mock.calls[0][0]).toContain('"a"');
+  });
+  it('warns when distinct labels collide on the same slug', () => {
+    const warn = vi.fn();
+    const g = groupByTaxonomy([p({ category: 'C++' }), p({ category: 'C#' }), p({ category: 'C#' })], 'category', warn);
+    expect([...g.keys()]).toEqual(['c']);
+    expect(g.get('c')!.posts).toHaveLength(3);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('C++');
+    expect(warn.mock.calls[0][0]).toContain('C#');
+    expect(warn.mock.calls[0][0]).toContain('"c"');
+  });
+  it('does not warn for case/diacritic/whitespace variants', () => {
+    const warn = vi.fn();
+    groupByTaxonomy([p({ category: 'Programación Web' }), p({ category: 'programacion  web' })], 'category', warn);
+    expect(warn).not.toHaveBeenCalled();
+  });
+  it('keeps non-Latin labels', () => {
+    const g = groupByTaxonomy([p({ category: '日本語' }), p({ category: 'Привет' })], 'category');
+    expect([...g.keys()]).toEqual(['日本語', 'привет']);
   });
 });
