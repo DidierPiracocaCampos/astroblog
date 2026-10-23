@@ -1,10 +1,11 @@
-import { existsSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { COMPONENT_KEYS, ROUTE_KEYS } from '../schema/config';
 import type { ComponentKey, ResolvedConfig, RouteKey } from '../schema/config';
 import { getUI } from '../i18n/index';
 import type { UIStrings } from '../i18n/index';
+import { DARK_THEME, LIGHT_THEME } from '../styles/themes';
 import { resolveRoutes, routePath } from './routes';
 
 /** Structurally a Vite plugin (vite is not a direct dependency to import its type from). */
@@ -26,20 +27,24 @@ function dirOf(url: URL): string {
 
 function resolveExisting(root: URL, p: string): string | undefined {
   const abs = path.resolve(fileURLToPath(root), p);
-  return existsSync(abs) ? toPosix(abs) : undefined;
+  try {
+    return statSync(abs).isFile() ? toPosix(abs) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Resolves a user-supplied path relative to the project root; throws naming key and path if missing. */
 export function resolveUserPath(root: URL, p: string, key: string): string {
   const abs = resolveExisting(root, p);
-  if (!abs) throw new Error(`astroblog: components.${key} points to "${p}", but that file does not exist.`);
+  if (!abs) throw new Error(`astroblog: components.${key} points to "${p}", but that is not an existing file.`);
   return abs;
 }
 
 /** Resolves a `customCss` entry relative to the project root; throws naming `customCss` and the path. */
 export function resolveCustomCss(root: URL, p: string): string {
   const abs = resolveExisting(root, p);
-  if (!abs) throw new Error(`astroblog: customCss entry "${p}" does not exist.`);
+  if (!abs) throw new Error(`astroblog: customCss entry "${p}" is not an existing file.`);
   return abs;
 }
 
@@ -77,6 +82,8 @@ export function buildStylesheet(opts: {
     `@source "${pkg}/legal";`,
     '@plugin "@tailwindcss/typography";',
     `@plugin "daisyui" {\n  themes: ${themes};\n}`,
+    ...(light === 'astroblog-light' ? [LIGHT_THEME] : []),
+    ...(dark === 'astroblog-dark' ? [DARK_THEME] : []),
     `@import "${pkg}/styles/global.css";`,
     ...opts.customCss.map((css) => `@import "${css}";`),
     '',
@@ -95,23 +102,28 @@ export interface VirtualModulesOptions {
 /**
  * Builds the code for each virtual module. `virtual:astroblog/styles` maps to the real
  * stylesheet file path (not code) so Tailwind's Vite plugin processes it.
+ * Also returns `customCss`: the already-resolved absolute POSIX paths (validated, throws
+ * naming `customCss` and the path). Pass them to `buildStylesheet` so they resolve once.
  */
-export function buildVirtualModules(config: ResolvedConfig, opts: VirtualModulesOptions): Record<string, string> {
-  // Validate customCss now so a bad path fails with a clear message (the stylesheet itself is written in Task 9).
-  config.customCss.forEach((p) => resolveCustomCss(opts.root, p));
+export function buildVirtualModules(
+  config: ResolvedConfig,
+  opts: VirtualModulesOptions,
+): { modules: Record<string, string>; customCss: string[] } {
+  const customCss = config.customCss.map((p) => resolveCustomCss(opts.root, p));
 
   const paths: Partial<Record<RouteKey, string>> = {};
   for (const key of ROUTE_KEYS) {
     if (resolveRoutes(config).some((r) => r.key === key)) paths[key] = routePath(config, key);
   }
 
-  return {
+  const modules = {
     'virtual:astroblog/config': exportDefault(config),
     'virtual:astroblog/ui': exportDefault(getUI(config.lang, config.ui as Partial<UIStrings> | undefined)),
     'virtual:astroblog/components': buildComponentsModule(config.components ?? {}, opts.root, opts.pkgDir),
     'virtual:astroblog/routes': exportDefault({ routes: resolveRoutes(config), paths }),
     'virtual:astroblog/styles': toPosix(opts.stylesheetPath),
   };
+  return { modules, customCss };
 }
 
 export function astroblogVitePlugin(modules: Record<string, string>): VirtualModulesPlugin {
