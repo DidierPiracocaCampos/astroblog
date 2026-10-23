@@ -254,7 +254,7 @@ Envuelve contenido de terceros (Giscus, embeds). Muestra un placeholder daisyUI 
   @plugin "daisyui/theme" { name: "astroblog-dark"; prefersdark: true; ... }
   ```
 - La lista de temas activos se genera según `theme.light`/`theme.dark` (temas incluidos de daisyUI o los propios).
-- `customCss` se inyecta después de `global.css` (vía `injectScript('page-ssr', 'import "..."')`), por lo que sus variables tienen prioridad.
+- La hoja final se genera en el build: la integración escribe `styles.css` en su directorio de codegen (`createCodegenDir()`) con `@import` de `global.css` + temas activos + `@import` de cada `customCss` al final, y `BaseLayout` la importa vía `virtual:astroblog/styles`. Así los `customCss` comparten el contexto de Tailwind (pueden usar `@plugin "daisyui/theme"`) y sus variables tienen prioridad.
 - El usuario personaliza con:
   ```css
   /* src/styles/tema.css */
@@ -293,13 +293,13 @@ Hook `astro:build:done`:
    ```
    Si el usuario ya tiene `public/_headers`, se fusiona (las reglas del usuario prevalecen) en lugar de sobrescribir.
 
-Configuración de Cloudflare Pages para el demo: build `pnpm --filter demo build`, directorio `examples/demo/dist`, Node ≥ 20.
+Configuración de Cloudflare Pages para el demo: build `pnpm --filter demo build`, directorio `examples/demo/dist`, Node ≥ 22.23.
 
 ## 10. Pruebas
 
 - **Unitarias (Vitest)** en `packages/astroblog/test`:
   - `schema`: defaults, errores y warnings descritos en §3.
-  - `lib`: paginación, readingTime, related posts (por categoría y tags compartidos), JSON-LD, `_headers` (incluida la fusión), `ads.txt`, `robots.txt`.
+  - `lib`: readingTime, related posts (por categoría y tags compartidos), JSON-LD, `_headers` (incluida la fusión), `ads.txt`, `robots.txt`.
   - `i18n`: fusión de textos con `ui`.
   - Resolución del módulo virtual de componentes (default vs override).
   - Plugin rehype de inserción de `inArticle`.
@@ -320,4 +320,4 @@ Configuración de Cloudflare Pages para el demo: build `pnpm --filter demo build
 
 ## 12. Versiones objetivo
 
-Última versión estable de Astro al iniciar la implementación (≥ 5; verificar compatibilidad de APIs de integración), Tailwind CSS 4, daisyUI 5, Pagefind 1, Node ≥ 20, pnpm.
+Astro 7 (verificado 2026-10-23: 7.4.x; Vite 8, compilador Rust estricto con HTML inválido), Tailwind CSS 4, daisyUI 5, Pagefind 1, Zod 4 (vía `astro/zod`), Node ≥ 22.23 (requisito de Astro 7), pnpm.
