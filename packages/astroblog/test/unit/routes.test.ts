@@ -27,8 +27,8 @@ describe('routes', () => {
   it('applies slug overrides', () => {
     const c = parseConfig({ ...base, slugs: { category: 'temas', about: '/quienes-somos/' } });
     expect(resolveRoutes(c).map((x) => x.pattern)).toEqual(expect.arrayContaining(['/temas/[cat]/[...page]', '/quienes-somos']));
-    expect(routePath(c, 'category', 'x')).toBe('/temas/x');
-    expect(routePath(c, 'about')).toBe('/quienes-somos');
+    expect(routePath(c, 'category', 'x')).toBe('/temas/x/');
+    expect(routePath(c, 'about')).toBe('/quienes-somos/');
   });
   it('includes ads.txt with adsense', () => {
     const adsense = { client: 'ca-pub-123' };
@@ -39,22 +39,40 @@ describe('routes', () => {
   it('routePath handles keys with and without params', () => {
     const c = parseConfig(base);
     expect(routePath(c, 'home')).toBe('/');
-    expect(routePath(c, 'category', 'web')).toBe('/categoria/web');
-    expect(routePath(c, 'category')).toBe('/categoria');
-    expect(routePath(c, 'post', '2024/hola')).toBe('/blog/2024/hola');
-    expect(routePath(c, 'legal')).toBe('/aviso-legal');
-    expect(routePath(parseConfig({ ...base, lang: 'en' }), 'author', 'ana')).toBe('/author/ana');
+    expect(routePath(c, 'category', 'web')).toBe('/categoria/web/');
+    expect(routePath(c, 'category')).toBe('/categoria/');
+    expect(routePath(c, 'post', '2024/hola')).toBe('/blog/2024/hola/');
+    expect(routePath(c, 'post', 'v1.2-notas')).toBe('/blog/v1.2-notas/');
+    expect(routePath(c, 'legal')).toBe('/aviso-legal/');
+    expect(routePath(parseConfig({ ...base, lang: 'en' }), 'author', 'ana')).toBe('/author/ana/');
+  });
+  it('routePath ends page paths with a slash but not file-like or 404 paths', () => {
+    const c = parseConfig(base);
+    expect(routePath(c, 'search')).toBe('/buscar/');
+    expect(routePath(c, 'rss')).toBe('/rss.xml');
+    expect(routePath(c, 'robots')).toBe('/robots.txt');
+    expect(routePath(c, 'adsTxt')).toBe('/ads.txt');
+    expect(routePath(c, 'notFound')).toBe('/404');
   });
 });
 
 describe('withBase', () => {
   it('joins base and path without double slashes', () => {
-    expect(withBase('/', '/privacidad')).toBe('/privacidad');
+    expect(withBase('/', '/privacidad')).toBe('/privacidad/');
     expect(withBase('/', '/')).toBe('/');
-    expect(withBase('/blog', '/privacidad')).toBe('/blog/privacidad');
-    expect(withBase('/blog/', '/privacidad')).toBe('/blog/privacidad');
+    expect(withBase('/blog', '/privacidad')).toBe('/blog/privacidad/');
+    expect(withBase('/blog/', '/privacidad')).toBe('/blog/privacidad/');
     expect(withBase('/blog/', '/')).toBe('/blog/');
     expect(withBase('/blog', 'pagefind/')).toBe('/blog/pagefind/');
+  });
+  it('ends page paths with a slash, keeping files, query and hash', () => {
+    expect(withBase('/', '/categoria/diseno')).toBe('/categoria/diseno/');
+    expect(withBase('/', '/categoria/diseno/')).toBe('/categoria/diseno/');
+    expect(withBase('/blog', '/logo.svg')).toBe('/blog/logo.svg');
+    expect(withBase('/', '/rss.xml')).toBe('/rss.xml');
+    expect(withBase('/', '/a.b/c')).toBe('/a.b/c/');
+    expect(withBase('/', '/buscar?q=x')).toBe('/buscar/?q=x');
+    expect(withBase('/', '/acerca#equipo')).toBe('/acerca/#equipo');
   });
   it('leaves external, protocol-relative, hash and mailto hrefs untouched', () => {
     expect(withBase('/blog', 'https://x.com/a')).toBe('https://x.com/a');

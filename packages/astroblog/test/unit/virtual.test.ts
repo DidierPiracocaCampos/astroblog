@@ -112,7 +112,7 @@ describe('virtual modules', () => {
   });
   it('routes module has routes and paths table', () => {
     const r = JSON.parse(modules['virtual:astroblog/routes'].replace(/^export default /, '').replace(/;$/, ''));
-    expect(r.paths.category).toBe('/categoria');
+    expect(r.paths.category).toBe('/categoria/');
     expect(r.paths.home).toBe('/');
     expect(r.routes.some((x: { key: string }) => x.key === 'post')).toBe(true);
     expect(r.paths.adsTxt).toBeUndefined();

@@ -73,8 +73,8 @@ describe('basic fixture: chrome', () => {
     const footer = html.slice(html.indexOf('<footer'), html.indexOf('</footer>'));
     expect(footer).toContain(ui.cookieSettings);
     expect(footer).toContain('onclick="window.googlefc=');
-    expect(footer).toContain('href="/privacidad"');
-    expect(footer).toContain('href="/cookies"');
+    expect(footer).toContain('href="/privacidad/"');
+    expect(footer).toContain('href="/cookies/"');
     expect(footer).toContain(ui.privacy);
     expect(footer).toContain(`© ${new Date().getFullYear()} Ana Pérez SL`);
     expect(footer).toContain('href="https://github.com/example"');
@@ -83,7 +83,7 @@ describe('basic fixture: chrome', () => {
   it('header has navbar, nav links, search button and theme toggle', () => {
     const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
     expect(header).toContain('navbar');
-    expect(header).toContain('href="/categoria/diseno"');
+    expect(header).toContain('href="/categoria/diseno/"');
     expect(header).toContain('theme-controller');
     expect(header).toContain('value="astroblog-dark"');
     expect(header).toContain(`aria-label="${ui.search}"`);

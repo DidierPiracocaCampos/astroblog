@@ -15,7 +15,7 @@ const { posts } = Astro.props;
   <section class="mt-12" aria-labelledby="related-title" data-pagefind-ignore>
     <h2 id="related-title" class="mb-6 text-2xl font-bold">{ui.related}</h2>
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post) => <PostCard post={post} />)}
+      {posts.map((post) => <PostCard post={post} headingLevel={3} />)}
     </div>
   </section>
 )}

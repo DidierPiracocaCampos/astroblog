@@ -1,27 +1,24 @@
 ---
 // Author page (`/autor/[author]`): every post of the author (slug = slugify(author); posts without
 // `author` count as the site's `author.name`). Uses `config.author` as the profile when it matches.
-import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
 import routes from 'virtual:astroblog/routes';
 import { AuthorBox } from 'virtual:astroblog/components';
 import ListLayout from '../layouts/ListLayout.astro';
-import { groupByTaxonomy, publishedPosts, slugify, withDefaultAuthor } from '../lib/posts';
+import { authorGroups } from '../lib/blog';
+import { slugify } from '../lib/posts';
+import { taxonomyPath } from '../lib/routes';
 
 export async function getStaticPaths() {
-  const posts = withDefaultAuthor(
-    publishedPosts(await getCollection('blog'), { includeDrafts: import.meta.env.DEV }),
-    config.author?.name,
-  );
-  const groups = groupByTaxonomy(posts, 'author', (m) => console.warn(`[astroblog] ${m}`));
+  const groups = await authorGroups(config.author?.name);
   return [...groups].map(([author, g]) => ({ params: { author }, props: { label: g.label, posts: g.posts } }));
 }
 
 const { label, posts } = Astro.props as { label: string; posts: CollectionEntry<'blog'>[] };
 const profile = config.author && slugify(config.author.name) === Astro.params.author ? config.author : undefined;
-const path = `${routes.paths.author}/${Astro.params.author}`;
+const path = taxonomyPath(routes.paths, 'author', label)!; // the route exists: it is rendering this page
 ---
 <ListLayout
   title={label}

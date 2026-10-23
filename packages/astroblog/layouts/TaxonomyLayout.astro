@@ -1,0 +1,37 @@
+---
+// One page of a category or tag listing (shared by routes/category.astro and routes/tag.astro):
+// title and <h1> from the original label, breadcrumbs, pagination (page 1 = section page, n = /n/).
+import type { Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import ui from 'virtual:astroblog/ui';
+import routes from 'virtual:astroblog/routes';
+import ListLayout from './ListLayout.astro';
+import { paginationPaths, taxonomyPath, withBase } from '../lib/routes';
+
+export interface Props {
+  kind: 'category' | 'tag';
+  label: string;
+  page: Page<CollectionEntry<'blog'>>;
+}
+
+const { kind, label, page } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const path = taxonomyPath(routes.paths, kind, label)!; // the route exists: it is rendering this page
+const paths = paginationPaths(path, path, page.lastPage);
+const n = page.currentPage;
+const title = n > 1 ? `${label} — ${ui.page} ${n}` : label;
+const breadcrumbs = [
+  { name: ui.home, href: '/' },
+  { name: label, href: path },
+  ...(n > 1 ? [{ name: `${ui.page} ${n}`, href: paths[n - 1] }] : []),
+];
+---
+<ListLayout
+  title={title}
+  description={`${kind === 'category' ? ui.categories : ui.tags}: ${label}`}
+  breadcrumbs={breadcrumbs}
+  heading={label}
+  posts={page.data}
+  currentPage={n}
+  urls={paths.map((p) => withBase(base, p))}
+/>

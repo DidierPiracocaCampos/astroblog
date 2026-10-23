@@ -25,7 +25,7 @@ describe('basic fixture: blog routes', () => {
     expect(f.exists('pagina/1/index.html')).toBe(false);
     expect(f.exists('pagina/3/index.html')).toBe(false);
     const home = await f.read('index.html');
-    expect(home).toContain('href="/pagina/2"');
+    expect(home).toContain('href="/pagina/2/"');
     const page2 = await f.read('pagina/2/index.html');
     expect(page2).toContain('<link rel="canonical" href="https://example.com/pagina/2/"');
     expect(page2).toContain('href="/"');
@@ -35,9 +35,9 @@ describe('basic fixture: blog routes', () => {
     const home = await f.read('index.html');
     expect(home.match(/class="card /g)).toHaveLength(2);
     // newest first: sin-anuncios (2026-03-20), post-largo (2026-02-15)
-    expect(home.indexOf('href="/blog/sin-anuncios"')).toBeGreaterThan(-1);
-    expect(home.indexOf('href="/blog/sin-anuncios"')).toBeLessThan(home.indexOf('href="/blog/post-largo"'));
-    expect(home).not.toContain('href="/blog/hola-mundo"');
+    expect(home.indexOf('href="/blog/sin-anuncios/"')).toBeGreaterThan(-1);
+    expect(home.indexOf('href="/blog/sin-anuncios/"')).toBeLessThan(home.indexOf('href="/blog/post-largo/"'));
+    expect(home).not.toContain('href="/blog/hola-mundo/"');
     expect(home).not.toContain('/blog/borrador');
     expect(home).toContain('badge');
     expect(home).toContain('20 de marzo de 2026');
@@ -67,7 +67,7 @@ describe('basic fixture: blog routes', () => {
     expect(posting.author.name).toBe('Ana Pérez');
     const crumbs = ld.find((d) => d['@type'] === 'BreadcrumbList');
     expect(crumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual([ui.home, 'Programación Web', 'Un post largo']);
-    expect(crumbs.itemListElement[1].item).toBe('https://example.com/categoria/programacion-web');
+    expect(crumbs.itemListElement[1].item).toBe('https://example.com/categoria/programacion-web/');
   });
 
   it('post is an article page with the pagefind body on the <article>', async () => {
@@ -100,14 +100,42 @@ describe('basic fixture: blog routes', () => {
     expect(html).toContain(ui.copyLink);
     const share = html.slice(html.indexOf('data-share-links'), html.indexOf('</section>', html.indexOf('data-share-links')));
     expect(share).not.toContain('<button');
-    expect(html).toContain('href="/autor/ana-perez"');
+    expect(html).toContain('href="/autor/ana-perez/"');
     expect(html).toContain('data-ad-slot="222"');
   });
 
   it('post shows related posts by category/tags', async () => {
     const html = await f.read('blog/post-largo/index.html');
     expect(html).toContain(ui.related);
-    expect(html).toContain('href="/blog/hola-mundo"');
+    expect(html).toContain('href="/blog/hola-mundo/"');
+  });
+
+  it('related post cards use <h3> under the related-posts <h2>', async () => {
+    const html = await f.read('blog/post-largo/index.html');
+    const related = html.slice(html.indexOf('id="related-title"'));
+    expect(related).toMatch(/<h3 class="card-title"><a href="\/blog\/hola-mundo\/"/);
+    expect(related).not.toContain('<h2 class="card-title"');
+    expect(await f.read('index.html')).toContain('<h2 class="card-title">');
+  });
+
+  it('every internal page link ends with a slash (no redirect hop)', async () => {
+    for (const page of ['blog/post-largo/index.html', 'index.html', 'pagina/2/index.html', 'categoria/programacion-web/index.html', 'autor/ana-perez/index.html']) {
+      const html = await f.read(page);
+      const hrefs = [...html.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1]);
+      const internal = hrefs.filter((h) => h.startsWith('/') && !h.startsWith('//'));
+      expect(internal.length, page).toBeGreaterThan(3);
+      const pages = internal.map((h) => h.replace(/[?#].*$/, '')).filter((h) => !/\.[^/]*$/.test(h));
+      for (const h of pages) expect(h, `${page}: ${h}`).toMatch(/\/$/);
+    }
+  });
+
+  it('BreadcrumbList last item equals the canonical URL', async () => {
+    for (const page of ['blog/post-largo/index.html', 'categoria/programacion-web/index.html', 'pagina/2/index.html', 'autor/ana-perez/index.html']) {
+      const html = await f.read(page);
+      const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)![1];
+      const crumbs = jsonLd(html).find((d) => d['@type'] === 'BreadcrumbList');
+      expect(crumbs.itemListElement.at(-1).item, page).toBe(canonical);
+    }
   });
 
   it('noAds post has no ad slots', async () => expect(await f.read('blog/sin-anuncios/index.html')).not.toContain('adsbygoogle"'));
@@ -115,9 +143,9 @@ describe('basic fixture: blog routes', () => {
   it('category page lists only its posts, titled with the label, with breadcrumbs', async () => {
     const html = await f.read('categoria/programacion-web/index.html');
     expect(html).toContain('<title>Programación Web | Blog Básico</title>');
-    expect(html).toContain('href="/blog/post-largo"');
-    expect(html).toContain('href="/blog/hola-mundo"');
-    expect(html).not.toContain('href="/blog/sin-anuncios"');
+    expect(html).toContain('href="/blog/post-largo/"');
+    expect(html).toContain('href="/blog/hola-mundo/"');
+    expect(html).not.toContain('href="/blog/sin-anuncios/"');
     expect(f.exists('categoria/programacion-web/2/index.html')).toBe(false);
     expect(f.exists('categoria/diseno/index.html')).toBe(true);
   });
@@ -131,8 +159,8 @@ describe('basic fixture: blog routes', () => {
   it('author page lists the posts of the default author with the configured profile', async () => {
     const html = await f.read('autor/ana-perez/index.html');
     expect(html).toContain('Ana Pérez');
-    expect(html).toContain('href="/blog/post-largo"');
-    expect(html).toContain('href="/blog/sin-anuncios"');
+    expect(html).toContain('href="/blog/post-largo/"');
+    expect(html).toContain('href="/blog/sin-anuncios/"');
   });
 
   it('emits only valid nesting on the post page (no block element inside <p>)', async () => {

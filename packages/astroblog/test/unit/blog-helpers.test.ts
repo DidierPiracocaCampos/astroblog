@@ -57,8 +57,10 @@ describe('formatDate', () => {
 describe('taxonomyPath', () => {
   const paths = { category: '/categoria', tag: '/etiqueta' };
   it('builds the base-relative path from the section path and the slugified label', () => {
-    expect(taxonomyPath(paths, 'category', 'Programación Web')).toBe('/categoria/programacion-web');
-    expect(taxonomyPath(paths, 'tag', 'Guía')).toBe('/etiqueta/guia');
+    expect(taxonomyPath(paths, 'category', 'Programación Web')).toBe('/categoria/programacion-web/');
+    expect(taxonomyPath(paths, 'tag', 'Guía')).toBe('/etiqueta/guia/');
+    // section paths from virtual:astroblog/routes end with '/'
+    expect(taxonomyPath({ category: '/categoria/' }, 'category', 'Diseño')).toBe('/categoria/diseno/');
   });
   it('is undefined when the route is disabled or the label has no slug', () => {
     expect(taxonomyPath(paths, 'author', 'Ana')).toBeUndefined();
@@ -68,8 +70,8 @@ describe('taxonomyPath', () => {
 
 describe('paginationPaths', () => {
   it('uses the first path for page 1 and prefix/n for the rest', () => {
-    expect(paginationPaths('/', '/pagina', 3)).toEqual(['/', '/pagina/2', '/pagina/3']);
-    expect(paginationPaths('/categoria/x', '/categoria/x', 2)).toEqual(['/categoria/x', '/categoria/x/2']);
+    expect(paginationPaths('/', '/pagina', 3)).toEqual(['/', '/pagina/2/', '/pagina/3/']);
+    expect(paginationPaths('/categoria/x', '/categoria/x/', 2)).toEqual(['/categoria/x/', '/categoria/x/2/']);
     expect(paginationPaths('/', '/pagina', 1)).toEqual(['/']);
   });
 });

@@ -2,30 +2,27 @@
 // Home listing pages 2..n (`/pagina/[page]`). Page 1 is not generated here: it is the home (`/`).
 import type { GetStaticPathsOptions, Page } from 'astro';
 import type { CollectionEntry } from 'astro:content';
-import { getCollection } from 'astro:content';
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
 import ListLayout from '../layouts/ListLayout.astro';
-import { publishedPosts } from '../lib/posts';
+import { loadPosts } from '../lib/blog';
 import { homePagesPrefix, paginationPaths, withBase } from '../lib/routes';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = publishedPosts(await getCollection('blog'), { includeDrafts: import.meta.env.DEV });
-  return paginate(posts, { pageSize: config.postsPerPage }).filter((p) => p.props.page.currentPage > 1);
+  return paginate(await loadPosts(), { pageSize: config.postsPerPage }).filter((p) => p.props.page.currentPage > 1);
 }
 
 const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
 const base = import.meta.env.BASE_URL;
-const prefix = homePagesPrefix(config);
-const urls = paginationPaths('/', prefix, page.lastPage).map((p) => withBase(base, p));
+const paths = paginationPaths('/', homePagesPrefix(config), page.lastPage);
 const label = `${ui.page} ${page.currentPage}`;
 ---
 <ListLayout
   title={label}
   description={config.description}
-  breadcrumbs={[{ name: ui.home, href: '/' }, { name: label, href: `${prefix}/${page.currentPage}` }]}
+  breadcrumbs={[{ name: ui.home, href: '/' }, { name: label, href: paths[page.currentPage - 1] }]}
   heading={label}
   posts={page.data}
   currentPage={page.currentPage}
-  urls={urls}
+  urls={paths.map((p) => withBase(base, p))}
 />

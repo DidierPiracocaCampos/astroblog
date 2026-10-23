@@ -1,14 +1,12 @@
 ---
 // Home: page 1 of the post listing (pages 2..n are page.astro). Empty state when there are no posts.
-import { getCollection } from 'astro:content';
 import config from 'virtual:astroblog/config';
 import ListLayout from '../layouts/ListLayout.astro';
-import { publishedPosts } from '../lib/posts';
+import { loadPosts } from '../lib/blog';
 import { homePagesPrefix, paginationPaths, withBase } from '../lib/routes';
 
 const base = import.meta.env.BASE_URL;
-// A missing `blog` collection yields [] (Astro logs a warning).
-const posts = publishedPosts(await getCollection('blog'), { includeDrafts: import.meta.env.DEV });
+const posts = await loadPosts();
 const lastPage = Math.max(1, Math.ceil(posts.length / config.postsPerPage));
 const urls = paginationPaths('/', homePagesPrefix(config), lastPage).map((p) => withBase(base, p));
 ---
