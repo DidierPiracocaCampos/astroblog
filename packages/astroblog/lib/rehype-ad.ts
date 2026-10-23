@@ -87,10 +87,19 @@ interface SatteriCtx {
   insertAfter(node: unknown, newNode: unknown): void;
 }
 
-/** Sätteri hast plugin (Astro 7 default processor): `hastPlugins: [satteriAd(opts)]`. */
+/**
+ * Sätteri hast plugin (Astro 7 default processor): `hastPlugins: [satteriAd(opts)]`.
+ *
+ * `adOptions` is not read by Sätteri (it only looks up visitor method names and `options`,
+ * its own `{ position }` settings). It is there because Astro's content layer caches rendered
+ * Markdown and invalidates it by a JSON digest of the Astro config, which drops functions:
+ * without a serialisable copy of the options, changing the slot/client (or dev ↔ build)
+ * would keep serving stale ad markup.
+ */
 export function satteriAd(opts: AdOptions) {
   return {
     name: 'astroblog-ad',
+    adOptions: { ...opts },
     after(root: Readonly<HastRoot>, ctx: SatteriCtx): void {
       const node = adNode(opts);
       const path = ctx.fileURL && decodeURIComponent(ctx.fileURL.pathname);

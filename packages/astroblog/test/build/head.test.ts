@@ -49,6 +49,10 @@ describe('basic fixture: head', () => {
     expect(html).toContain('<meta property="og:url" content="https://example.com/"');
   });
 
+  it('advertises the RSS feed with an absolute URL', () => {
+    expect(html).toContain('<link rel="alternate" type="application/rss+xml" title="Blog Básico" href="https://example.com/rss.xml"');
+  });
+
   it('inlines a theme script mapping light/dark to the configured theme names', () => {
     const m = html.match(/<script>([^<]*astroblog-theme[^<]*)<\/script>/);
     expect(m).not.toBeNull();
@@ -100,6 +104,25 @@ describe('basic fixture: chrome', () => {
   });
 });
 
+describe('base fixture', () => {
+  it('RSS autodiscovery link respects base', async () => {
+    const page = await (await buildFixture('base')).read('index.html');
+    expect(page).toContain('type="application/rss+xml" title="Blog con base" href="https://x.com/blog/rss.xml"');
+  });
+});
+
+describe('google consent without adsense (minimal fixtures): no CMP', () => {
+  it('hides the cookie settings button in the footer', async () => {
+    for (const name of ['minimal', 'minimal-legal']) {
+      const page = await (await buildFixture(name)).read('index.html');
+      const footer = page.slice(page.indexOf('<footer'), page.indexOf('</footer>'));
+      expect(footer, name).not.toContain('googlefc');
+      expect(footer, name).not.toContain('<button');
+      expect(footer, name).toContain('href="/');
+    }
+  });
+});
+
 describe('nosite fixture', () => {
   it('omits canonical, og:url and JSON-LD instead of emitting relative URLs', async () => {
     const page = await (await buildFixture('nosite')).read('index.html');
@@ -107,6 +130,7 @@ describe('nosite fixture', () => {
     expect(page).not.toContain('rel="canonical"');
     expect(page).not.toContain('og:url');
     expect(page).not.toContain('application/ld+json');
+    expect(page).not.toContain('application/rss+xml'); // no site → no rss.xml route
   });
   it('omits search button and dialog when search is off', async () => {
     const page = await (await buildFixture('nosite')).read('index.html');

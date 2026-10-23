@@ -133,6 +133,13 @@ describe('astroblog integration', () => {
     const { processor, updates } = await setup({ ...base, adsense }, { site: 'https://x.com' });
     expect(processor.options.hastPlugins).toHaveLength(1);
     expect(processor.options.hastPlugins[0].name).toBe('astroblog-ad');
+    // Astro's content layer invalidates cached Markdown HTML by a JSON digest of the config, which
+    // drops functions: the options must be serialisable on the plugin object.
+    const json = JSON.stringify(processor.options.hastPlugins[0]);
+    expect(json).toContain('"999"');
+    expect(json).toContain('"ca-pub-123"');
+    const dev = await setup({ ...base, adsense }, { site: 'https://x.com', command: 'dev' });
+    expect(JSON.stringify(dev.processor.options.hastPlugins[0])).not.toBe(json);
     // never uses the deprecated markdown.rehypePlugins (needs @astrojs/markdown-remark in Astro 7)
     expect(updates.some((x) => x.markdown?.rehypePlugins)).toBe(false);
   });

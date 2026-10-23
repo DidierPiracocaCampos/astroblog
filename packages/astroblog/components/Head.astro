@@ -3,6 +3,7 @@
 // meta → OG/Twitter/JSON-LD → theme script → consent default → CMP → AdSense → GA4.
 // The global CSS link is appended by Astro after this content (imported in BaseLayout).
 import config from 'virtual:astroblog/config';
+import routes from 'virtual:astroblog/routes';
 import { absoluteImage, absoluteUrl, buildMeta } from '../lib/seo';
 import { adsenseScript, ga4Scripts } from '../lib/consent';
 import { stripBase } from '../lib/routes';
@@ -28,6 +29,8 @@ const site = Astro.site?.href;
 const canonical = site && !noindex ? absoluteUrl(site, base, stripBase(base, Astro.url.pathname)) : undefined;
 // Relative images need `site` too: without it og:image/twitter:image are omitted.
 const absImage = absoluteImage(site, base, image);
+// Feed autodiscovery: rss.xml is only injected when `site` is set (index.ts) and the route is enabled.
+const rssUrl = site && routes.paths.rss ? absoluteUrl(site, base, routes.paths.rss) : undefined;
 
 const { title: fullTitle, meta } = buildMeta({
   title,
@@ -51,6 +54,7 @@ const ldJson = (data: object) => JSON.stringify(data).replace(/</g, '\\u003c');
 <meta name="description" content={description} />
 {noindex && <meta name="robots" content="noindex" />}
 {canonical && <link rel="canonical" href={canonical} />}
+{rssUrl && <link rel="alternate" type="application/rss+xml" title={config.title} href={rssUrl} />}
 {social.map((m) => (m.property ? <meta property={m.property} content={m.content} /> : <meta name={m.name} content={m.content} />))}
 {jsonLd.map((data) => <script is:inline type="application/ld+json" set:html={ldJson(data)} />)}
 <script is:inline set:html={themeScript(config.theme)} />
