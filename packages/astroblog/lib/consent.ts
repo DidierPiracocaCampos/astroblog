@@ -37,9 +37,18 @@ export function cmpHead(consent: Consent): string {
 }
 
 /**
- * JS expression to reopen the preferences UI. Meant to be placed inside an HTML
- * `onclick="..."` attribute, so built-in outputs use single quotes only.
- * For `custom`, `consent.reopen` is returned verbatim (the user must avoid double quotes).
+ * Whether a consent management platform actually loads. Google's CMP ("Privacy & messaging")
+ * is delivered by the AdSense script, so `provider: 'google'` without `adsense` has none:
+ * consent stays denied and there is no preferences UI to reopen.
+ */
+export function hasCmp(config: Pick<ResolvedConfig, 'consent' | 'adsense'>): boolean {
+  return config.consent.provider !== 'google' || Boolean(config.adsense);
+}
+
+/**
+ * JS expression to reopen the preferences UI, placed in an `onclick` attribute.
+ * For `custom`, `consent.reopen` is returned verbatim; any quotes are safe because Astro
+ * escapes attribute values (`"` → `&quot;`, decoded back by the HTML parser).
  */
 export function reopenScript(consent: Consent): string {
   switch (consent.provider) {

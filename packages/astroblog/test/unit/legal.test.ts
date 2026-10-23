@@ -22,7 +22,12 @@ describe('legalContext', () => {
       consent: { provider: 'cookiebot', id: 'x' },
     }));
     expect(c).toMatchObject({ ads: true, ga4: true, giscus: true, cmp: 'Cookiebot (Usercentrics)' });
-    expect(legalContext(parseConfig(base)).cmp).toContain('Google');
+    expect(legalContext(parseConfig({ ...base, adsense: { client: 'ca-pub-1' } })).cmp).toContain('Google');
+  });
+
+  it('has no CMP when the google provider has no adsense to load it', () => {
+    expect(legalContext(parseConfig(base)).cmp).toBeUndefined();
+    expect(legalContext(parseConfig({ ...base, consent: { provider: 'cookieyes', id: 'x' } })).cmp).toBe('CookieYes');
   });
 });
 

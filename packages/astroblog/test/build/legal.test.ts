@@ -96,6 +96,28 @@ describe('institutional and legal pages', () => {
     expect(main).toContain('<table class="table');
   });
 
+  it('without a CMP (google provider, no adsense) legal pages say so and offer no settings button', async () => {
+    const es = await buildFixture('minimal');
+    for (const [fx, pages, phrase] of [
+      [es, ['cookies', 'privacidad'], 'no tiene configurada ninguna plataforma de gestión del consentimiento'],
+      [en, ['cookies', 'privacy'], 'has no consent management platform configured'],
+    ] as const) {
+      for (const p of pages) {
+        const html = await fx.read(`${p}/index.html`);
+        const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+        expect(main, p).toContain(phrase);
+        expect(main, p).not.toContain('Google');
+        expect(main, p).not.toContain('googlefc');
+        expect(main, p).not.toContain('<button');
+      }
+    }
+  });
+
+  it('with a CMP, legal pages name it', async () => {
+    expect(await f.read('cookies/index.html')).toContain('Privacidad y mensajes');
+    expect(await f.read('privacidad/index.html')).toContain('Privacidad y mensajes');
+  });
+
   it('cookies table lists statistics and marketing only for active services', async () => {
     const withAll = await f.read('cookies/index.html');
     expect(withAll).toContain('data-cookie-category="necessary"');

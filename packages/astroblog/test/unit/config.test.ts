@@ -84,6 +84,32 @@ describe('validateConfig', () => {
   it('does not warn about posts when hasPosts is undefined', () => {
     expect(validateConfig(parseConfig(base), { site: 'https://x.com' }).warnings).toEqual([]);
   });
+  describe('google CMP without adsense', () => {
+    const ga4 = { analytics: { ga4: 'G-1' } };
+    const giscus = { comments: { giscus: { repo: 'r', repoId: 'i', category: 'c', categoryId: 'ci' } } };
+    const warn = (cfg: object) => validateConfig(parseConfig({ ...base, ...cfg }), { site: 'https://x.com' }).warnings;
+
+    it('warns (es) when GA4 or Giscus depend on a CMP that never loads', () => {
+      for (const cfg of [ga4, giscus, { ...ga4, ...giscus }]) {
+        const w = warn(cfg);
+        expect(w).toHaveLength(1);
+        expect(w[0]).toMatch(/adsense/);
+        expect(w[0]).toMatch(/cookiebot/);
+        expect(w[0]).toMatch(/consentimiento/);
+      }
+    });
+    it('warns in english when lang is en', () => {
+      const w = warn({ ...ga4, lang: 'en' });
+      expect(w).toHaveLength(1);
+      expect(w[0]).toMatch(/consent management platform/);
+      expect(w[0]).toMatch(/cookieyes/);
+    });
+    it('does not warn with adsense, another provider, or nothing needing consent', () => {
+      expect(warn({ ...ga4, adsense: { client: 'ca-pub-1' } })).toEqual([]);
+      expect(warn({ ...ga4, consent: { provider: 'cookiebot', id: 'x' } })).toEqual([]);
+      expect(warn({})).toEqual([]);
+    });
+  });
   it('reports messages in english when lang is en', () => {
     const c = parseConfig({ ...base, lang: 'en', adsense: { client: 'ca-pub-123' } });
     const r = validateConfig(c, {});

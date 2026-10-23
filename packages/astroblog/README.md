@@ -124,6 +124,7 @@ Todas las opciones se validan al iniciar Astro (`astro:config:setup`). Los error
 
 - No hay posts publicados (la portada muestra un estado vacío).
 - `routes` desactiva una página que AdSense espera (`about`, `contact`, `privacy`, `cookies`), o `adsense` está activo con `routes.privacy: false`.
+- `consent.provider: 'google'` (el valor por defecto) sin `adsense`, con `analytics.ga4` o `comments.giscus`: no se carga ninguna CMP (ver [Consentimiento](#consentimiento)).
 - Un post con título de más de 70 caracteres o descripción fuera de 50–160.
 - Una página tuya en `src/pages/` coincide con una ruta inyectada (desactiva la nuestra con `routes.<clave>: false`).
 - El procesador Markdown activo no admite plugins (el anuncio `inArticle` no se insertará).
@@ -295,9 +296,15 @@ import routes from 'virtual:astroblog/routes'; // routes.paths.about === '/acerc
 import { ThemeToggle } from '@didierp/astroblog/components';
 
 export interface Props { currentPath: string }
+
+// `routes.paths` son relativas a `base`: antepón import.meta.env.BASE_URL para que los enlaces
+// funcionen también con `base: '/blog'`.
+const base = import.meta.env.BASE_URL.replace(//$/, '');
+const href = (path: string) => `${base}${path}`;
 ---
 <header class="navbar">
-  <a href="/">{config.title}</a>
+  <a href={href('/')}>{config.title}</a>
+  {routes.paths.about && <a href={href(routes.paths.about)}>{ui.about}</a>}
   <ThemeToggle />
 </header>
 ```
@@ -328,6 +335,8 @@ consent: { provider: 'google' } // o simplemente omite `consent`
 ```
 
 No se añade ningún script: el mensaje lo sirve el propio tag de AdSense.
+
+> **Sin `adsense` no hay CMP.** La plataforma de Google solo llega con el script de AdSense. Si usas `provider: 'google'` sin `adsense`, no se carga ninguna CMP: GA4 se queda con el consentimiento denegado, `ConsentGate` (Giscus) no se desbloquea, se ocultan «Configuración de cookies» y el botón «Gestionar cookies», y las políticas de privacidad y cookies indican que no hay plataforma de gestión del consentimiento. Si además tienes `analytics.ga4` o `comments.giscus`, el build muestra un aviso: configura `adsense` o usa `cookiebot`, `cookieyes` o `custom`.
 
 1. Entra en [AdSense](https://adsense.google.com) → **Privacidad y mensajes**.
 2. En **Mensajes del RGPD (Europa)**, pulsa **Crear mensaje**, elige tu sitio y el idioma.
@@ -370,7 +379,7 @@ consent: {
 }
 ```
 
-`reopen` se coloca dentro de un atributo `onclick="…"`: usa solo comillas simples. Tu CMP debe actualizar Consent Mode (`gtag('consent', 'update', …)`) y, para desbloquear `ConsentGate`, comunicar las categorías concedidas (`marketing`, `statistics`, `preferences`) de una de estas formas (o ambas):
+`reopen` se coloca en el atributo `onclick` del botón (Astro escapa el valor, así que puedes usar cualquier tipo de comillas). Tu CMP debe actualizar Consent Mode (`gtag('consent', 'update', …)`) y, para desbloquear `ConsentGate`, comunicar las categorías concedidas (`marketing`, `statistics`, `preferences`) de una de estas formas (o ambas):
 
 ```js
 // Al cargar, si ya había consentimiento:

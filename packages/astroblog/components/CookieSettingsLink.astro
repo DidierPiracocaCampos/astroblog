@@ -1,8 +1,9 @@
 ---
 // System component (not overridable): reopens the CMP preferences UI (spec §6).
+// Renders nothing when no CMP loads (`provider: 'google'` without adsense, see `hasCmp`).
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
-import { reopenScript } from '../lib/consent';
+import { hasCmp, reopenScript } from '../lib/consent';
 
 export interface Props {
   class?: string;
@@ -10,4 +11,6 @@ export interface Props {
 
 const { class: className } = Astro.props;
 ---
-<button type="button" class:list={['link', className]} onclick={reopenScript(config.consent)}>{ui.cookieSettings}</button>
+{hasCmp(config) && (
+  <button type="button" class:list={['link', className]} onclick={reopenScript(config.consent)}>{ui.cookieSettings}</button>
+)}

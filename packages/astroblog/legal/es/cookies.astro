@@ -17,8 +17,10 @@ const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) 
 const rows = [
   {
     id: 'necessary', name: 'Necesarias',
-    purpose: 'Permiten el funcionamiento básico del sitio y recuerdan tus preferencias de consentimiento.',
-    providers: `Este sitio; ${c.cmp}`, consent: 'No (exentas)',
+    purpose: c.cmp
+      ? 'Permiten el funcionamiento básico del sitio y recuerdan tus preferencias de consentimiento.'
+      : 'Permiten el funcionamiento básico del sitio.',
+    providers: c.cmp ? `Este sitio; ${c.cmp}` : 'Este sitio', consent: 'No (exentas)',
   },
   {
     id: 'preferences', name: 'Preferencias',
@@ -73,10 +75,17 @@ const rows = [
 )}
 
 <h2>Cómo gestionar las cookies</h2>
-<p>
-  Gestionamos el consentimiento con {c.cmp}. Las cookies que requieren consentimiento no se activan hasta que las
-  aceptas, y puedes cambiar tu elección en cualquier momento: <CookieSettingsLink />.
-</p>
+{c.cmp ? (
+  <p>
+    Gestionamos el consentimiento con {c.cmp}. Las cookies que requieren consentimiento no se activan hasta que las
+    aceptas, y puedes cambiar tu elección en cualquier momento: <CookieSettingsLink />.
+  </p>
+) : (
+  <p data-no-cmp>
+    Este sitio no tiene configurada ninguna plataforma de gestión del consentimiento, por lo que no ofrece un panel para
+    elegir qué cookies aceptas. Los servicios que requieren consentimiento permanecen con el consentimiento denegado.
+  </p>
+)}
 <p>
   También puedes bloquear o eliminar las cookies desde la configuración de tu navegador; si bloqueas las necesarias,
   algunas partes del sitio podrían no funcionar correctamente.

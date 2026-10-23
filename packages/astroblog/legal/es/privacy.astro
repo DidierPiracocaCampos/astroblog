@@ -93,11 +93,19 @@ const site = Astro.site ? new URL(base, Astro.site).href : undefined;
 )}
 
 <h2>Consentimiento</h2>
-<p>
-  Gestionamos tu consentimiento para cookies y tecnologías similares con {c.cmp}. Las cookies no necesarias permanecen
-  desactivadas hasta que las aceptas, y puedes cambiar o retirar tu consentimiento en cualquier momento:
-  <CookieSettingsLink />.
-</p>
+{c.cmp ? (
+  <p>
+    Gestionamos tu consentimiento para cookies y tecnologías similares con {c.cmp}. Las cookies no necesarias permanecen
+    desactivadas hasta que las aceptas, y puedes cambiar o retirar tu consentimiento en cualquier momento:
+    <CookieSettingsLink />.
+  </p>
+) : (
+  <p data-no-cmp>
+    Este sitio no tiene configurada ninguna plataforma de gestión del consentimiento, por lo que no ofrece un panel para
+    dar o retirar tu consentimiento para cookies y tecnologías similares. Los servicios que lo requieren permanecen con
+    el consentimiento denegado.
+  </p>
+)}
 
 <h2>Conservación</h2>
 <p>

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  adsenseScript, cmpHead, consentDefaultScript, ga4Scripts, reopenScript,
+  adsenseScript, cmpHead, consentDefaultScript, ga4Scripts, hasCmp, reopenScript,
 } from '../../lib/consent';
 import { onConsent } from '../../lib/consent-client';
 import { mountConsentGates } from '../../lib/consent-gate-client';
@@ -223,5 +223,14 @@ describe('mountConsentGates', () => {
     mountConsentGates();
     expect(document.getElementById('inner')).not.toBeNull();
     expect(document.querySelector('[data-consent-placeholder]')).toBeNull();
+  });
+});
+
+describe('hasCmp', () => {
+  it("is false only for the google provider without adsense (Google's CMP ships with AdSense)", () => {
+    expect(hasCmp({ consent: { provider: 'google' }, adsense: undefined })).toBe(false);
+    expect(hasCmp({ consent: { provider: 'google' }, adsense: { client: 'ca-pub-1' } } as any)).toBe(true);
+    expect(hasCmp({ consent: { provider: 'cookiebot', id: 'x' }, adsense: undefined })).toBe(true);
+    expect(hasCmp({ consent: { provider: 'custom', head: 'h', reopen: 'r' }, adsense: undefined })).toBe(true);
   });
 });

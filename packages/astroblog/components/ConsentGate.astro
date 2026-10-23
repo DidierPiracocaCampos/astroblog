@@ -1,10 +1,10 @@
 ---
 // System component (not overridable): renders its slot inside a <template> that the client script
 // (lib/consent-gate-client.ts) unlocks once `category` is consented; until then a daisyUI alert
-// explains why and offers to reopen the CMP preferences.
+// explains why and offers to reopen the CMP preferences (when a CMP loads, see `hasCmp`).
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
-import { reopenScript } from '../lib/consent';
+import { hasCmp, reopenScript } from '../lib/consent';
 
 export interface Props {
   category: 'marketing' | 'statistics' | 'preferences';
@@ -15,7 +15,7 @@ const { category } = Astro.props;
 <div data-consent-root>
   <div role="alert" class="alert alert-soft my-6" data-consent-placeholder>
     <span>{ui.consentRequired}</span>
-    <button type="button" class="btn btn-sm" onclick={reopenScript(config.consent)}>{ui.manageCookies}</button>
+    {hasCmp(config) && <button type="button" class="btn btn-sm" onclick={reopenScript(config.consent)}>{ui.manageCookies}</button>}
   </div>
   <template data-consent-gate data-provider={config.consent.provider} data-category={category}><slot /></template>
 </div>

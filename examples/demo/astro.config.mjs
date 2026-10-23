@@ -38,7 +38,9 @@ export default defineConfig({
       //   slots: { inArticle: '1111111111', afterPost: '2222222222', sidebar: '3333333333' },
       // },
 
-      consent: { provider: 'google' }, // por defecto: Privacidad y mensajes de AdSense
+      // Por defecto: Privacidad y mensajes de Google, que llega con el script de AdSense. Sin `adsense`
+      // no se carga ninguna CMP: si activas analytics o comments, activa también adsense o elige otra CMP.
+      consent: { provider: 'google' },
       // consent: { provider: 'cookiebot', id: '00000000-0000-0000-0000-000000000000' },
       // consent: { provider: 'cookieyes', id: 'xxxxxxxxxxxxxxxxxxxxxxxx' },
       // consent: { provider: 'custom', head: '<script src="https://cmp.example.com/cmp.js"></script>', reopen: 'window.miCmp.open()' },

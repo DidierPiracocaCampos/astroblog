@@ -1,5 +1,6 @@
 // Values interpolated by the legal/institutional templates (legal/<lang>/*.astro), spec §8.
 import type { Lang, ResolvedConfig } from '../schema/config';
+import { hasCmp } from './consent';
 
 export type InstitutionalKey = 'about' | 'contact' | 'privacy' | 'cookies' | 'terms' | 'legal';
 export const INSTITUTIONAL_KEYS: readonly InstitutionalKey[] = ['about', 'contact', 'privacy', 'cookies', 'terms', 'legal'];
@@ -13,8 +14,8 @@ export interface LegalContext {
   ads: boolean;
   ga4: boolean;
   giscus: boolean;
-  /** Human name of the consent management platform. */
-  cmp: string;
+  /** Human name of the consent management platform; undefined when none loads (see `hasCmp`). */
+  cmp?: string;
 }
 
 const CMP_NAMES: Record<Lang, Record<ResolvedConfig['consent']['provider'], string>> = {
@@ -40,7 +41,7 @@ export function legalContext(config: ResolvedConfig): LegalContext {
     ads: Boolean(config.adsense),
     ga4: Boolean(config.analytics?.ga4),
     giscus: Boolean(config.comments?.giscus),
-    cmp: CMP_NAMES[config.lang][config.consent.provider],
+    cmp: hasCmp(config) ? CMP_NAMES[config.lang][config.consent.provider] : undefined,
   };
 }
 

@@ -17,8 +17,10 @@ const privacyHref = routes.paths.privacy ? withBase(base, routes.paths.privacy) 
 const rows = [
   {
     id: 'necessary', name: 'Necessary',
-    purpose: 'Enable the basic operation of the site and remember your consent choices.',
-    providers: `This site; ${c.cmp}`, consent: 'No (exempt)',
+    purpose: c.cmp
+      ? 'Enable the basic operation of the site and remember your consent choices.'
+      : 'Enable the basic operation of the site.',
+    providers: c.cmp ? `This site; ${c.cmp}` : 'This site', consent: 'No (exempt)',
   },
   {
     id: 'preferences', name: 'Preferences',
@@ -73,10 +75,17 @@ const rows = [
 )}
 
 <h2>Managing cookies</h2>
-<p>
-  We manage consent with {c.cmp}. Cookies that require consent are not set until you accept them, and you can change
-  your choice at any time: <CookieSettingsLink />.
-</p>
+{c.cmp ? (
+  <p>
+    We manage consent with {c.cmp}. Cookies that require consent are not set until you accept them, and you can change
+    your choice at any time: <CookieSettingsLink />.
+  </p>
+) : (
+  <p data-no-cmp>
+    This site has no consent management platform configured, so it offers no panel to choose which cookies you accept.
+    Services that require consent stay with consent denied.
+  </p>
+)}
 <p>
   You can also block or delete cookies in your browser settings; if you block necessary cookies, parts of the site may
   not work properly.

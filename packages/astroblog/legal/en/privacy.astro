@@ -92,10 +92,17 @@ const site = Astro.site ? new URL(base, Astro.site).href : undefined;
 )}
 
 <h2>Consent</h2>
-<p>
-  We manage your consent to cookies and similar technologies with {c.cmp}. Non-essential cookies stay disabled until
-  you accept them, and you can change or withdraw your consent at any time: <CookieSettingsLink />.
-</p>
+{c.cmp ? (
+  <p>
+    We manage your consent to cookies and similar technologies with {c.cmp}. Non-essential cookies stay disabled until
+    you accept them, and you can change or withdraw your consent at any time: <CookieSettingsLink />.
+  </p>
+) : (
+  <p data-no-cmp>
+    This site has no consent management platform configured, so it offers no panel to give or withdraw consent to
+    cookies and similar technologies. Services that require consent stay with consent denied.
+  </p>
+)}
 
 <h2>Retention</h2>
 <p>
