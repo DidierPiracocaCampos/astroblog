@@ -1,0 +1,94 @@
+@plugin "daisyui/theme" {
+  name: "astroblog-light";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(97% 0 0);
+  --color-base-300: oklch(92% 0 0);
+  --color-base-content: oklch(25% 0.01 255);
+  --color-primary: oklch(55% 0.2 255);
+  --color-primary-content: oklch(98% 0.01 255);
+  --color-secondary: oklch(45% 0.03 255);
+  --color-secondary-content: oklch(98% 0 0);
+  --color-accent: oklch(65% 0.15 200);
+  --color-accent-content: oklch(20% 0.03 200);
+  --color-neutral: oklch(30% 0.02 255);
+  --color-neutral-content: oklch(97% 0 0);
+  --color-info: oklch(70% 0.15 235);
+  --color-info-content: oklch(20% 0.04 235);
+  --color-success: oklch(70% 0.17 150);
+  --color-success-content: oklch(20% 0.05 150);
+  --color-warning: oklch(82% 0.17 85);
+  --color-warning-content: oklch(25% 0.06 85);
+  --color-error: oklch(62% 0.22 27);
+  --color-error-content: oklch(97% 0.01 27);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "astroblog-dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(22% 0.01 255);
+  --color-base-200: oklch(19% 0.01 255);
+  --color-base-300: oklch(16% 0.01 255);
+  --color-base-content: oklch(92% 0.01 255);
+  --color-primary: oklch(65% 0.19 255);
+  --color-primary-content: oklch(15% 0.03 255);
+  --color-secondary: oklch(70% 0.03 255);
+  --color-secondary-content: oklch(15% 0.01 255);
+  --color-accent: oklch(72% 0.14 200);
+  --color-accent-content: oklch(18% 0.03 200);
+  --color-neutral: oklch(32% 0.02 255);
+  --color-neutral-content: oklch(92% 0.01 255);
+  --color-info: oklch(72% 0.14 235);
+  --color-info-content: oklch(18% 0.04 235);
+  --color-success: oklch(72% 0.16 150);
+  --color-success-content: oklch(18% 0.05 150);
+  --color-warning: oklch(83% 0.16 85);
+  --color-warning-content: oklch(22% 0.06 85);
+  --color-error: oklch(66% 0.21 27);
+  --color-error-content: oklch(15% 0.04 27);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Typography plugin mapped to daisyUI variables so .prose follows the active theme. */
+.prose {
+  --tw-prose-body: var(--color-base-content);
+  --tw-prose-headings: var(--color-base-content);
+  --tw-prose-lead: var(--color-base-content);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-base-content);
+  --tw-prose-counters: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  --tw-prose-bullets: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+  --tw-prose-hr: var(--color-base-300);
+  --tw-prose-quotes: var(--color-base-content);
+  --tw-prose-quote-borders: var(--color-primary);
+  --tw-prose-captions: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  --tw-prose-code: var(--color-base-content);
+  --tw-prose-pre-code: var(--color-neutral-content);
+  --tw-prose-pre-bg: var(--color-neutral);
+  --tw-prose-th-borders: var(--color-base-300);
+  --tw-prose-td-borders: var(--color-base-300);
+}
+
+/* Reserved height for ad slots to avoid layout shift. */
+.ad-slot {
+  min-height: var(--ad-min-height, 280px);
+}
