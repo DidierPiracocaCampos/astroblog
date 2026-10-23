@@ -11,7 +11,7 @@ Tú escribes la configuración y los posts en Markdown/MDX; la integración pone
 - Estilos con Tailwind CSS 4 + daisyUI 5, temas claro/oscuro y personalización con variables CSS.
 - `_headers` para Cloudflare Pages (caché de recursos y cabeceras de seguridad).
 
-Requisitos: **Astro ≥ 7.4**, **Node ≥ 22.23**. Salida siempre estática (`output: 'static'`).
+Requisitos: **Astro ≥ 7.4**, **Node ≥ 22.23.4**. Salida siempre estática (`output: 'static'`).
 
 > Hay un sitio de ejemplo completo en [`examples/demo`](../../examples/demo) del repositorio.
 
@@ -414,7 +414,7 @@ El build es 100 % estático: no hace falta adaptador.
 2. Configuración de build (para el demo de este monorepo):
    - **Comando de build:** `pnpm --filter demo build`
    - **Directorio de salida:** `examples/demo/dist`
-   - **Variable de entorno:** `NODE_VERSION=22.23`
+   - **Variable de entorno:** `NODE_VERSION=22`
 3. En un proyecto propio de un solo paquete: comando `pnpm build` (o `npm run build`) y salida `dist`.
 
 Tras el build, la integración escribe `dist/_headers`:

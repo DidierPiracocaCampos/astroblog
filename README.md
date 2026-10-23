@@ -7,7 +7,7 @@ Monorepo de [`@didierp/astroblog`](packages/astroblog), una integración de Astr
 
 ## Desarrollo
 
-Requisitos: Node ≥ 22.23 y pnpm ≥ 9.
+Requisitos: Node ≥ 22.23.4 y pnpm ≥ 9.
 
 ```sh
 pnpm install          # dependencias de todo el workspace
