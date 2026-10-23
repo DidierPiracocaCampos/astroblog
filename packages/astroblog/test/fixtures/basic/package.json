@@ -1,0 +1,10 @@
+{
+  "name": "fixture-basic",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.23.0" },
+  "dependencies": {
+    "@didierp/astroblog": "workspace:*",
+    "astro": "^7.4.2"
+  }
+}

@@ -39,6 +39,10 @@ export interface UIStrings {
   cookies: string;
   terms: string;
   legal: string;
+  menu: string;
+  close: string;
+  breadcrumbs: string;
+  copyright: string;
 }
 
 const DICTIONARIES: Record<Lang, UIStrings> = { es, en };

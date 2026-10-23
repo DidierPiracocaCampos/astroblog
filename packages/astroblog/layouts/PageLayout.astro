@@ -1,0 +1,16 @@
+---
+// Simple content page (institutional pages, etc.): BaseLayout + a `prose` article with the title as <h1>.
+import BaseLayout from './BaseLayout.astro';
+import type { Props as BaseProps } from './BaseLayout.astro';
+
+export type Props = BaseProps;
+
+const props = Astro.props;
+---
+<BaseLayout {...props}>
+  <article class="prose mx-auto max-w-3xl">
+    <h1>{props.title}</h1>
+    <slot />
+  </article>
+  {Astro.slots.has('aside') && <slot name="aside" slot="aside" />}
+</BaseLayout>

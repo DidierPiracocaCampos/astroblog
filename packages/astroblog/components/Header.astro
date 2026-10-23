@@ -1,0 +1,66 @@
+---
+// Overridable: `components.Header`. daisyUI `navbar` with logo/title, nav links,
+// search button (when `search` is on) and theme toggle; `dropdown` menu on small screens.
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+import { ThemeToggle } from 'virtual:astroblog/components';
+import { withBase } from '../lib/routes';
+
+export interface Props {
+  /** Current pathname (`Astro.url.pathname`, including `base`). */
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const trim = (p: string) => p.replace(/\/+$/, '') || '/';
+const links = (config.nav ?? []).map((item) => {
+  const href = withBase(base, item.href);
+  return { label: item.label, href, current: trim(href) === trim(currentPath) };
+});
+const home = withBase(base, '/');
+const logo = config.logo ? withBase(base, config.logo) : undefined;
+---
+<header class="bg-base-100 border-b border-base-300">
+  <div class="navbar mx-auto max-w-6xl px-4">
+    <div class="navbar-start gap-1">
+      {links.length > 0 && (
+        <details class="dropdown lg:hidden">
+          <summary class="btn btn-ghost btn-circle" aria-label={ui.menu}>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </summary>
+          <ul class="menu dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow">
+            {links.map((l) => (
+              <li><a href={l.href} class:list={[{ 'menu-active': l.current }]} aria-current={l.current ? 'page' : undefined}>{l.label}</a></li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <a href={home} class="btn btn-ghost text-xl" aria-current={trim(home) === trim(currentPath) ? 'page' : undefined}>
+        {logo && <img src={logo} alt="" class="h-8 w-auto" />}
+        <span>{config.title}</span>
+      </a>
+    </div>
+    {links.length > 0 && (
+      <nav class="navbar-center hidden lg:flex" aria-label={ui.menu}>
+        <ul class="menu menu-horizontal px-1">
+          {links.map((l) => (
+            <li><a href={l.href} class:list={[{ 'menu-active': l.current }]} aria-current={l.current ? 'page' : undefined}>{l.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+    <div class="navbar-end gap-1">
+      {config.search && (
+        <button type="button" class="btn btn-ghost btn-circle" aria-label={ui.search} title={ui.search} data-astroblog-search-open>
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      )}
+      <ThemeToggle />
+    </div>
+  </div>
+</header>

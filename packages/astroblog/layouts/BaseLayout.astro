@@ -1,0 +1,73 @@
+---
+// Base document: <head> (via Head, in spec §6 order) + site chrome (Header, Footer, Search).
+// Slots: default (main content) and `aside` (sidebar, shown next to the content on large screens).
+import 'virtual:astroblog/styles';
+import config from 'virtual:astroblog/config';
+import { Breadcrumbs, Footer, Header, Search } from 'virtual:astroblog/components';
+import Head from '../components/Head.astro';
+import { absoluteUrl, jsonLdBreadcrumbs, jsonLdWebsite } from '../lib/seo';
+
+export interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  /** `href` relative to `base`, like the `virtual:astroblog/routes` paths. */
+  breadcrumbs?: { name: string; href: string }[];
+  jsonLd?: object[];
+}
+
+const { title, description, image, type, publishedTime, modifiedTime, breadcrumbs = [], jsonLd = [] } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const site = Astro.site?.href;
+
+// Structured data needs absolute URLs: emitted only when `site` is set.
+const structured: object[] = [];
+if (site) {
+  const logo = config.logo ? (/^https?:\/\//.test(config.logo) ? config.logo : absoluteUrl(site, base, config.logo)) : undefined;
+  structured.push(jsonLdWebsite({
+    name: config.title,
+    url: absoluteUrl(site, base, '/'),
+    description: config.description,
+    publisher: { name: config.owner?.name ?? config.author?.name ?? config.title, logo },
+  }));
+  if (breadcrumbs.length) {
+    structured.push(jsonLdBreadcrumbs(breadcrumbs.map((b) => ({ name: b.name, url: absoluteUrl(site, base, b.href) }))));
+  }
+}
+structured.push(...jsonLd);
+
+const hasAside = Astro.slots.has('aside');
+---
+<!doctype html>
+<html lang={config.lang}>
+  <head>
+    <Head
+      title={title}
+      description={description}
+      image={image}
+      type={type}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      jsonLd={structured}
+    />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <Header currentPath={Astro.url.pathname} />
+    <div class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      {breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
+      {hasAside ? (
+        <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <main id="main" class="min-w-0"><slot /></main>
+          <aside class="min-w-0"><slot name="aside" /></aside>
+        </div>
+      ) : (
+        <main id="main"><slot /></main>
+      )}
+    </div>
+    <Footer />
+    {config.search && <Search />}
+  </body>
+</html>

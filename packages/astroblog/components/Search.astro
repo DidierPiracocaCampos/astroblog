@@ -1,0 +1,78 @@
+---
+// Overridable: `components.Search`. daisyUI `modal` (<dialog>) hosting Pagefind's default UI,
+// loaded from `<base>pagefind/pagefind-ui.js` the first time the dialog opens.
+// Rendered by BaseLayout only when `search` is on. Opened by any `[data-astroblog-search-open]`
+// element, `/` or Ctrl/Cmd+K.
+import ui from 'virtual:astroblog/ui';
+import { withBase } from '../lib/routes';
+
+const bundle = withBase(import.meta.env.BASE_URL, 'pagefind/');
+---
+<dialog id="astroblog-search" class="modal modal-top sm:modal-middle" aria-label={ui.search} data-bundle={bundle} data-placeholder={ui.searchPlaceholder}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label={ui.close}>✕</button>
+    </form>
+    <h2 class="mb-4 text-lg font-bold">{ui.search}</h2>
+    <div id="astroblog-search-ui"></div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>{ui.close}</button>
+  </form>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('astroblog-search') as HTMLDialogElement | null;
+  if (dialog) {
+    let loading: Promise<void> | undefined;
+
+    const loadUI = () =>
+      (loading ??= new Promise<void>((resolve, reject) => {
+        const { bundle = '/pagefind/', placeholder } = dialog.dataset;
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = `${bundle}pagefind-ui.css`;
+        document.head.append(css);
+        const script = document.createElement('script');
+        script.src = `${bundle}pagefind-ui.js`;
+        script.onload = () => {
+          const PagefindUI = (window as any).PagefindUI;
+          new PagefindUI({
+            element: '#astroblog-search-ui',
+            bundlePath: bundle,
+            showSubResults: true,
+            translations: placeholder ? { placeholder } : undefined,
+          });
+          resolve();
+        };
+        script.onerror = () => {
+          loading = undefined;
+          reject(new Error('pagefind-ui.js could not be loaded'));
+        };
+        document.head.append(script);
+      }));
+
+    const open = () => {
+      if (!dialog.open) dialog.showModal();
+      loadUI()
+        .then(() => dialog.querySelector<HTMLInputElement>('input')?.focus())
+        .catch((e) => console.error(e));
+    };
+
+    for (const el of document.querySelectorAll('[data-astroblog-search-open]')) {
+      el.addEventListener('click', open);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const target = e.target as HTMLElement | null;
+      const typing = !!target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        open();
+      } else if (e.key === '/' && !typing && !dialog.open) {
+        e.preventDefault();
+        open();
+      }
+    });
+  }
+</script>

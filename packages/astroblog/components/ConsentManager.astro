@@ -1,0 +1,10 @@
+---
+// System component (not overridable): Consent Mode v2 default + the CMP script (spec §6, steps 4–5).
+// Must be rendered inside <head>, before AdSense and GA4.
+import config from 'virtual:astroblog/config';
+import { cmpHead, consentDefaultScript } from '../lib/consent';
+
+const cmp = cmpHead(config.consent);
+---
+<script is:inline set:html={consentDefaultScript()} />
+{cmp && <Fragment set:html={cmp} />}

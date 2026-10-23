@@ -81,7 +81,7 @@ export function buildStylesheet(opts: {
     `@source "${pkg}/routes";`,
     `@source "${pkg}/legal";`,
     '@plugin "@tailwindcss/typography";',
-    `@plugin "daisyui" {\n  themes: ${themes};\n}`,
+    `@plugin "daisyui" {\n  themes: ${themes};\n  logs: false;\n}`,
     ...(light === 'astroblog-light' ? [LIGHT_THEME] : []),
     ...(dark === 'astroblog-dark' ? [DARK_THEME] : []),
     `@import "${pkg}/styles/global.css";`,

@@ -82,3 +82,24 @@ export function routePath(config: ResolvedConfig, key: RouteKey, param?: string)
     default: return `/${slug(config, key)}`;
   }
 }
+
+const EXTERNAL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
+
+/**
+ * Prefixes a base-relative path with Astro's `base` (`import.meta.env.BASE_URL`),
+ * never producing `//`. External URLs, protocol-relative URLs, `mailto:` and `#hash` are returned as is.
+ */
+export function withBase(base: string, path: string): string {
+  if (EXTERNAL.test(path)) return path;
+  const b = base.replace(/\/+$/, '');
+  const p = path.replace(/^\/+/, '');
+  return `${b}/${p}`;
+}
+
+/** Inverse of `withBase` for a pathname (e.g. `Astro.url.pathname`): returns the base-relative path. */
+export function stripBase(base: string, pathname: string): string {
+  const b = base.replace(/\/+$/, '');
+  if (!b) return pathname;
+  if (pathname === b || pathname === `${b}/`) return '/';
+  return pathname.startsWith(`${b}/`) ? pathname.slice(b.length) : pathname;
+}

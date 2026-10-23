@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseConfig } from '../../schema/config';
-import { resolveRoutes, routePath } from '../../lib/routes';
+import { resolveRoutes, routePath, stripBase, withBase } from '../../lib/routes';
 
 const base = { title: 'T', description: 'D' };
 const patterns = (c: unknown) => resolveRoutes(parseConfig(c)).map((x) => x.pattern);
@@ -44,5 +44,32 @@ describe('routes', () => {
     expect(routePath(c, 'post', '2024/hola')).toBe('/blog/2024/hola');
     expect(routePath(c, 'legal')).toBe('/aviso-legal');
     expect(routePath(parseConfig({ ...base, lang: 'en' }), 'author', 'ana')).toBe('/author/ana');
+  });
+});
+
+describe('withBase', () => {
+  it('joins base and path without double slashes', () => {
+    expect(withBase('/', '/privacidad')).toBe('/privacidad');
+    expect(withBase('/', '/')).toBe('/');
+    expect(withBase('/blog', '/privacidad')).toBe('/blog/privacidad');
+    expect(withBase('/blog/', '/privacidad')).toBe('/blog/privacidad');
+    expect(withBase('/blog/', '/')).toBe('/blog/');
+    expect(withBase('/blog', 'pagefind/')).toBe('/blog/pagefind/');
+  });
+  it('leaves external, protocol-relative, hash and mailto hrefs untouched', () => {
+    expect(withBase('/blog', 'https://x.com/a')).toBe('https://x.com/a');
+    expect(withBase('/blog', '//cdn.x.com/a')).toBe('//cdn.x.com/a');
+    expect(withBase('/blog', '#top')).toBe('#top');
+    expect(withBase('/blog', 'mailto:a@b.c')).toBe('mailto:a@b.c');
+  });
+});
+
+describe('stripBase', () => {
+  it('removes the base prefix from a pathname', () => {
+    expect(stripBase('/', '/privacidad')).toBe('/privacidad');
+    expect(stripBase('/blog', '/blog/privacidad')).toBe('/privacidad');
+    expect(stripBase('/blog/', '/blog/')).toBe('/');
+    expect(stripBase('/blog', '/blog')).toBe('/');
+    expect(stripBase('/blog', '/blogger')).toBe('/blogger');
   });
 });

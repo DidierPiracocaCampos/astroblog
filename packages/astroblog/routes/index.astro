@@ -1,15 +1,8 @@
 ---
-// stub: replaced in Task 12
+// stub: replaced in Task 12 (provisional home on BaseLayout)
 import config from 'virtual:astroblog/config';
-
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<html lang={config.lang}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{config.title}</title>
-  </head>
-  <body>
-    <h1>{config.title}</h1>
-  </body>
-</html>
+<BaseLayout title={config.title} description={config.description}>
+  <h1 class="text-3xl font-bold">{config.title}</h1>
+</BaseLayout>

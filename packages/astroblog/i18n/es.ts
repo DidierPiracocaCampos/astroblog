@@ -37,4 +37,8 @@ export const es: UIStrings = {
   cookies: 'Política de cookies',
   terms: 'Términos y condiciones',
   legal: 'Aviso legal',
+  menu: 'Menú',
+  close: 'Cerrar',
+  breadcrumbs: 'Ruta de navegación',
+  copyright: '© {year} {name}',
 };
