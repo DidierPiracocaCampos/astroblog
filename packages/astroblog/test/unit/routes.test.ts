@@ -24,6 +24,10 @@ describe('routes', () => {
     expect(p).not.toContain('/terminos');
     expect(p).toContain('/privacidad');
   });
+  it('omits the search page when search is off', () => {
+    expect(patterns(base)).toContain('/buscar');
+    expect(patterns({ ...base, search: false })).not.toContain('/buscar');
+  });
   it('applies slug overrides', () => {
     const c = parseConfig({ ...base, slugs: { category: 'temas', about: '/quienes-somos/' } });
     expect(resolveRoutes(c).map((x) => x.pattern)).toEqual(expect.arrayContaining(['/temas/[cat]/[...page]', '/quienes-somos']));

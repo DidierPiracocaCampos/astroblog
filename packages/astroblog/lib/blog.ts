@@ -2,11 +2,15 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import type { PaginateFunction } from 'astro';
+import config from 'virtual:astroblog/config';
+import { noPostsWarning } from '../schema/validate';
 import { groupByTaxonomy, publishedPosts, withDefaultAuthor } from './posts';
 
 export type BlogPost = CollectionEntry<'blog'>;
 
 let cached: Promise<BlogPost[]> | undefined;
+
+const warn = (message: string) => console.warn(`[astroblog] ${message}`);
 
 async function load(): Promise<BlogPost[]> {
   let entries: BlogPost[];
@@ -16,13 +20,16 @@ async function load(): Promise<BlogPost[]> {
   } catch {
     entries = [];
   }
-  return publishedPosts(entries, { includeDrafts: import.meta.env.DEV });
+  const posts = publishedPosts(entries, { includeDrafts: import.meta.env.DEV });
+  // `validateConfig` cannot know about posts in astro:config:setup: warn here, once per build.
+  if (!import.meta.env.DEV && posts.length === 0) warn(noPostsWarning(config.lang));
+  return posts;
 }
 
 /**
  * Published posts, newest first; drafts only in `astro dev`. In a build the collection is read once
- * and shared by every route (one "collection does not exist" warning at most); in dev it is re-read
- * on each call so content edits show up.
+ * and shared by every route (one "collection does not exist" warning at most, and one "no published
+ * posts" warning when it is empty); in dev it is re-read on each call so content edits show up.
  */
 export function loadPosts(): Promise<BlogPost[]> {
   if (import.meta.env.DEV) return load();
@@ -51,8 +58,6 @@ export async function findPage(id: string): Promise<PageEntry | undefined> {
   const pages = import.meta.env.DEV ? loadPagesUncached() : (cachedPages ??= loadPagesUncached());
   return (await pages).find((p) => p.id === id);
 }
-
-const warn = (message: string) => console.warn(`[astroblog] ${message}`);
 
 /**
  * `getStaticPaths` result for a paginated taxonomy route (`/categoria/[cat]/[...page]`): one

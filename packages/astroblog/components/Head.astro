@@ -17,13 +17,15 @@ export interface Props {
   publishedTime?: Date;
   modifiedTime?: Date;
   jsonLd?: object[];
+  /** Pages that must not be indexed (404): `robots` noindex and no canonical/og:url. */
+  noindex?: boolean;
 }
 
-const { title, description, image, type = 'website', publishedTime, modifiedTime, jsonLd = [] } = Astro.props;
+const { title, description, image, type = 'website', publishedTime, modifiedTime, jsonLd = [], noindex = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const site = Astro.site?.href;
 // Without `site` there is no absolute URL: canonical and og:url are omitted.
-const canonical = site ? absoluteUrl(site, base, stripBase(base, Astro.url.pathname)) : undefined;
+const canonical = site && !noindex ? absoluteUrl(site, base, stripBase(base, Astro.url.pathname)) : undefined;
 // Relative images need `site` too: without it og:image/twitter:image are omitted.
 const absImage = absoluteImage(site, base, image);
 
@@ -47,6 +49,7 @@ const ldJson = (data: object) => JSON.stringify(data).replace(/</g, '\\u003c');
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex" />}
 {canonical && <link rel="canonical" href={canonical} />}
 {social.map((m) => (m.property ? <meta property={m.property} content={m.content} /> : <meta name={m.name} content={m.content} />))}
 {jsonLd.map((data) => <script is:inline type="application/ld+json" set:html={ldJson(data)} />)}

@@ -34,6 +34,7 @@ function slug(config: ResolvedConfig, key: SlugKey): string {
 function enabled(config: ResolvedConfig, key: RouteKey): boolean {
   if (config.routes?.[key] === false) return false;
   if (key === 'adsTxt') return Boolean(config.adsense);
+  if (key === 'search') return config.search;
   return true;
 }
 

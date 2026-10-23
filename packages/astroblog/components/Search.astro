@@ -22,40 +22,19 @@ const bundle = withBase(import.meta.env.BASE_URL, 'pagefind/');
 </dialog>
 
 <script>
+  import { mountPagefindUI } from '../lib/pagefind-client';
+
   const dialog = document.getElementById('astroblog-search') as HTMLDialogElement | null;
   if (dialog) {
-    let loading: Promise<void> | undefined;
+    let loading: Promise<unknown> | undefined;
 
-    const loadUI = () =>
-      (loading ??= new Promise<void>((resolve, reject) => {
-        const { bundle = '/pagefind/', placeholder } = dialog.dataset;
-        const css = document.createElement('link');
-        css.rel = 'stylesheet';
-        css.href = `${bundle}pagefind-ui.css`;
-        document.head.append(css);
-        const script = document.createElement('script');
-        script.src = `${bundle}pagefind-ui.js`;
-        script.onload = () => {
-          try {
-            const PagefindUI = (window as any).PagefindUI;
-            new PagefindUI({
-              element: '#astroblog-search-ui',
-              bundlePath: bundle,
-              showSubResults: true,
-              translations: placeholder ? { placeholder } : undefined,
-            });
-            resolve();
-          } catch (e) {
-            loading = undefined;
-            reject(e);
-          }
-        };
-        script.onerror = () => {
-          loading = undefined;
-          reject(new Error('pagefind-ui.js could not be loaded'));
-        };
-        document.head.append(script);
+    const loadUI = () => {
+      const { bundle = '/pagefind/', placeholder } = dialog.dataset;
+      return (loading ??= mountPagefindUI({ element: '#astroblog-search-ui', bundle, placeholder }).catch((e) => {
+        loading = undefined;
+        throw e;
       }));
+    };
 
     const open = () => {
       if (!dialog.open) dialog.showModal();

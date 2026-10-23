@@ -4,8 +4,10 @@ export function adsTxt(client: string): string {
   return `google.com, ${client.replace(/^ca-/, '')}, DIRECT, f08c47fec0942fa0\n`;
 }
 
-export function robotsTxt(sitemapUrl: string): string {
-  return `User-agent: *\nAllow: /\n\nSitemap: ${sitemapUrl}\n`;
+/** Without `sitemapUrl` (no `site`: only an absolute URL is valid there) the Sitemap line is omitted. */
+export function robotsTxt(sitemapUrl?: string): string {
+  const rules = 'User-agent: *\nAllow: /\n';
+  return sitemapUrl ? `${rules}\nSitemap: ${sitemapUrl}\n` : rules;
 }
 
 export const DEFAULT_HEADERS = `/_astro/*

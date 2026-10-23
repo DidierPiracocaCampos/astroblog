@@ -86,6 +86,11 @@ describe('astroblog integration', () => {
     }
   });
 
+  it('injects rss.xml only when the Astro config has a site (@astrojs/rss needs absolute links)', async () => {
+    expect((await setup(base)).routes.map((r) => r.pattern)).not.toContain('/rss.xml');
+    expect((await setup(base, { site: 'https://x.com' })).routes.map((r) => r.pattern)).toContain('/rss.xml');
+  });
+
   it('injects ads.txt with adsense, but not when public/ads.txt exists', async () => {
     const withAds = await setup({ ...base, adsense }, { site: 'https://x.com' });
     expect(withAds.routes.map((r) => r.pattern)).toContain('/ads.txt');

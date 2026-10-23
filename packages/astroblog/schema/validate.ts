@@ -15,6 +15,11 @@ const T = {
   },
 } as const;
 
+/** The "no published posts" warning; also emitted by `loadPosts` in a build, where posts are known. */
+export function noPostsWarning(lang: ResolvedConfig['lang']): string {
+  return T[lang].noPosts;
+}
+
 const ADSENSE_ROUTES: RouteKey[] = ['about', 'contact', 'privacy', 'cookies'];
 
 export function validateConfig(

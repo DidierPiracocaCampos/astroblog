@@ -1,5 +1,7 @@
 // Type-check-only shim: plain `tsc` cannot read .astro files (Astro's language tools can).
 // Not shipped (absent from package.json "files"); consumers get real types from Astro.
+// `import.meta.env` (BASE_URL, DEV, SITE) in lib/ and routes/ comes from Astro's client types.
+/// <reference types="astro/client" />
 declare module '*.astro' {
   const Component: import('astro/runtime/server/index.js').AstroComponentFactory;
   export default Component;

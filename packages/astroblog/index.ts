@@ -106,8 +106,11 @@ export default function astroblog(userConfig?: unknown): AstroIntegration {
           }, config.lang, logger);
         }
 
+        // The user's public/ads.txt wins over ours. RSS needs absolute links (@astrojs/rss requires
+        // `site`): without `site` there is no feed.
         const ownAdsTxt = existsSync(new URL('ads.txt', astro.publicDir));
-        injected = resolveRoutes(config).filter((r) => !(r.key === 'adsTxt' && ownAdsTxt));
+        injected = resolveRoutes(config).filter((r) =>
+          !(r.key === 'adsTxt' && ownAdsTxt) && !(r.key === 'rss' && !astro.site));
         for (const r of injected) {
           injectRoute({ pattern: r.pattern, entrypoint: new URL(`./routes/${r.entry}`, import.meta.url) });
         }

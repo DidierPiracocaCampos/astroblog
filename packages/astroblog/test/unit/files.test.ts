@@ -16,6 +16,9 @@ describe('robotsTxt', () => {
       'User-agent: *\nAllow: /\n\nSitemap: https://x.com/sitemap-index.xml\n',
     );
   });
+  it('omits the Sitemap line without a sitemap URL (no site: robots.txt needs an absolute URL)', () => {
+    expect(robotsTxt()).toBe('User-agent: *\nAllow: /\n');
+  });
 });
 
 describe('DEFAULT_HEADERS', () => {

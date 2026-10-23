@@ -17,9 +17,11 @@ export interface Props {
   /** `href` relative to `base`, like the `virtual:astroblog/routes` paths. */
   breadcrumbs?: { name: string; href: string }[];
   jsonLd?: object[];
+  /** Not indexable (404): see Head. */
+  noindex?: boolean;
 }
 
-const { title, description, image, type, publishedTime, modifiedTime, breadcrumbs = [], jsonLd = [] } = Astro.props;
+const { title, description, image, type, publishedTime, modifiedTime, breadcrumbs = [], jsonLd = [], noindex } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const site = Astro.site?.href;
 
@@ -52,6 +54,7 @@ const hasAside = Astro.slots.has('aside');
       publishedTime={publishedTime}
       modifiedTime={modifiedTime}
       jsonLd={structured}
+      noindex={noindex}
     />
   </head>
   <body class="flex min-h-screen flex-col">

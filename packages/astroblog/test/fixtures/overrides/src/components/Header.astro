@@ -1,0 +1,8 @@
+---
+// Header override: receives the same props as the built-in Header.
+export interface Props {
+  currentPath: string;
+}
+const { currentPath } = Astro.props;
+---
+<header data-custom-header={currentPath}>Cabecera propia</header>
