@@ -35,6 +35,29 @@ describe('parseConfig', () => {
     expect(() => parseConfig({ ...base, adsense: { client: 'x' } })).toThrow(/debe tener el formato/));
 });
 
+describe('parseConfig localized issues', () => {
+  const msg = (input: unknown) => {
+    try { parseConfig(input); } catch (e) { return (e as Error).message; }
+    return '';
+  };
+  it('es: missing cookiebot id', () =>
+    expect(msg({ ...base, consent: { provider: 'cookiebot' } })).toMatch(/consent\.id: es obligatorio/));
+  it('en: missing cookiebot id', () =>
+    expect(msg({ ...base, lang: 'en', consent: { provider: 'cookiebot' } })).toMatch(/consent\.id: is required/));
+  it('es: unknown component key', () =>
+    expect(msg({ ...base, components: { Foo: 'x' } })).toMatch(/components: clave\(s\) desconocida\(s\): "Foo"/));
+  it('en: unknown component key', () =>
+    expect(msg({ ...base, lang: 'en', components: { Foo: 'x' } })).toMatch(/components: unknown key\(s\): "Foo"/));
+  it('es/en: invalid theme.default', () => {
+    expect(msg({ ...base, theme: { default: 'x' } })).toMatch(/theme\.default: valor no válido/);
+    expect(msg({ ...base, lang: 'en', theme: { default: 'x' } })).toMatch(/theme\.default: invalid value/);
+  });
+  it('es/en: wrong type', () => {
+    expect(msg({ title: 1, description: 'D' })).toMatch(/title: debe ser de tipo string/);
+    expect(msg({ title: 1, description: 'D', lang: 'en' })).toMatch(/title: must be of type string/);
+  });
+});
+
 describe('validateConfig', () => {
   it('errors when adsense is set without site', () => {
     const c = parseConfig({ ...base, adsense: { client: 'ca-pub-123' } });

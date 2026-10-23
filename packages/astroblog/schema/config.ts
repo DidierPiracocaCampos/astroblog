@@ -21,6 +21,48 @@ const MESSAGES = {
   en: { clientFormat: 'must look like ca-pub-XXXXXXXX (digits only after "ca-pub-")' },
 } as const;
 
+const ISSUE_TEXT = {
+  es: {
+    required: 'es obligatorio',
+    invalidType: (expected: string) => `debe ser de tipo ${expected}`,
+    unrecognizedKeys: (keys: string[]) => `clave(s) desconocida(s): ${keys.map((k) => `"${k}"`).join(', ')}`,
+    invalidValue: (values: string) => `valor no válido; valores permitidos: ${values}`,
+    invalidUnion: 'valor no válido (revisa `provider` y sus campos)',
+    tooSmall: 'valor demasiado pequeño o vacío',
+    tooBig: 'valor demasiado grande',
+    invalidFormat: 'formato no válido',
+    other: 'valor no válido',
+  },
+  en: {
+    required: 'is required',
+    invalidType: (expected: string) => `must be of type ${expected}`,
+    unrecognizedKeys: (keys: string[]) => `unknown key(s): ${keys.map((k) => `"${k}"`).join(', ')}`,
+    invalidValue: (values: string) => `invalid value; allowed values: ${values}`,
+    invalidUnion: 'invalid value (check `provider` and its fields)',
+    tooSmall: 'value is too small or empty',
+    tooBig: 'value is too large',
+    invalidFormat: 'invalid format',
+    other: 'invalid value',
+  },
+} as const;
+
+function localizedError(lang: Lang) {
+  const t = ISSUE_TEXT[lang];
+  return (iss: any): string => {
+    switch (iss.code) {
+      case 'invalid_type':
+        return iss.input === undefined ? t.required : t.invalidType(String(iss.expected));
+      case 'unrecognized_keys': return t.unrecognizedKeys(iss.keys ?? []);
+      case 'invalid_value': return t.invalidValue((iss.values ?? []).map(String).join(', '));
+      case 'invalid_union': return t.invalidUnion;
+      case 'too_small': return t.tooSmall;
+      case 'too_big': return t.tooBig;
+      case 'invalid_format': return t.invalidFormat;
+      default: return t.other;
+    }
+  };
+}
+
 function peekLang(input: unknown): Lang {
   const lang = (input as { lang?: unknown } | null)?.lang;
   return lang === 'en' ? 'en' : 'es';
@@ -100,7 +142,8 @@ export class AstroblogConfigError extends Error {
 }
 
 export function parseConfig(input: unknown): ResolvedConfig {
-  const result = buildSchema(peekLang(input)).safeParse(input);
+  const lang = peekLang(input);
+  const result = buildSchema(lang).safeParse(input, { error: localizedError(lang) });
   if (result.success) return result.data;
   throw new AstroblogConfigError(
     result.error.issues.map((i) => ({ path: i.path.map(String).join('.'), message: i.message })),
