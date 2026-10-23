@@ -34,6 +34,12 @@ describe('slugify', () => {
     expect(slugify('Привет')).toBe('привет');
     expect(slugify('!!!')).toBe('');
   });
+  it('keeps combining marks outside the Latin diacritics range, in NFC', () => {
+    expect(slugify('がくせい')).toBe('がくせい');
+    expect(slugify('हिन्दी')).toBe('हिन्दी');
+    expect(slugify('한국어'.normalize('NFD'))).toBe('한국어'.normalize('NFC'));
+    expect(slugify('Ñandú')).toBe('nandu');
+  });
   it('collapses runs of symbols and trims dashes', () => {
     expect(slugify('--Hello___World!!')).toBe('hello-world');
   });
