@@ -16,5 +16,6 @@ export { default as Comments } from './components/Comments.astro';
 // System components
 export { default as Head } from './components/Head.astro';
 export { default as ConsentManager } from './components/ConsentManager.astro';
+export { default as ConsentGate } from './components/ConsentGate.astro';
 export { default as CookieSettingsLink } from './components/CookieSettingsLink.astro';
 export { default as AdSlot } from './components/AdSlot.astro';

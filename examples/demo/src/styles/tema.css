@@ -1,0 +1,5 @@
+/* Personalización del tema: redefine variables de daisyUI sobre los temas activos. */
+[data-theme="astroblog-light"] {
+  --color-primary: oklch(60% 0.2 250);
+  --radius-box: 0.5rem;
+}

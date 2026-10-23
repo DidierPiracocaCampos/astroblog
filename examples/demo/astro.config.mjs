@@ -1,0 +1,61 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import astroblog from '@didierp/astroblog';
+
+// Demo de @didierp/astroblog. Las opciones comentadas muestran el resto de la API;
+// descoméntalas para probarlas (ver packages/astroblog/README.md).
+export default defineConfig({
+  // Obligatorio para canónicas, sitemap, RSS, JSON-LD y para usar `adsense`.
+  site: 'https://astroblog-demo.pages.dev',
+  integrations: [
+    astroblog({
+      title: 'Cuaderno Web',
+      description: 'Notas prácticas sobre desarrollo web, diseño de interfaces y rendimiento, escritas en español.',
+      lang: 'es', // 'es' | 'en'
+      logo: '/logo.svg', // ruta pública (carpeta public/)
+      author: {
+        name: 'Laura Gómez',
+        email: 'laura@astroblog-demo.pages.dev',
+        url: 'https://astroblog-demo.pages.dev/acerca/',
+        // avatar: '/avatar.jpg',
+      },
+      owner: { name: 'Laura Gómez', country: 'España', email: 'legal@astroblog-demo.pages.dev' },
+      social: {
+        github: 'https://github.com/didierp/astroblog',
+        // x: 'https://x.com/usuario',
+        // linkedin: 'https://www.linkedin.com/in/usuario',
+      },
+      nav: [
+        { label: 'Blog', href: '/' },
+        { label: 'Acerca', href: '/acerca' },
+        { label: 'Contacto', href: '/contacto' },
+      ],
+
+      // Anuncios: requiere `site`. Sin este bloque no se carga ningún script ni se genera ads.txt.
+      // adsense: {
+      //   client: 'ca-pub-0000000000000000',
+      //   autoAds: true,
+      //   slots: { inArticle: '1111111111', afterPost: '2222222222', sidebar: '3333333333' },
+      // },
+
+      consent: { provider: 'google' }, // por defecto: Privacidad y mensajes de AdSense
+      // consent: { provider: 'cookiebot', id: '00000000-0000-0000-0000-000000000000' },
+      // consent: { provider: 'cookieyes', id: 'xxxxxxxxxxxxxxxxxxxxxxxx' },
+      // consent: { provider: 'custom', head: '<script src="https://cmp.example.com/cmp.js"></script>', reopen: 'window.miCmp.open()' },
+
+      // analytics: { ga4: 'G-XXXXXXXXXX' },
+      // comments: { giscus: { repo: 'usuario/repo', repoId: 'R_xxx', category: 'Comentarios', categoryId: 'DIC_xxx' } },
+
+      theme: { light: 'astroblog-light', dark: 'astroblog-dark', default: 'system' },
+      // theme: { light: 'corporate', dark: 'business', default: 'light' }, // temas incluidos de daisyUI
+      customCss: ['./src/styles/tema.css'],
+      // components: { Header: './src/components/MiHeader.astro' },
+      // routes: { terms: false },
+      // slugs: { category: 'temas', tag: 'etiquetas' },
+      search: true,
+      contact: { email: 'contacto@astroblog-demo.pages.dev' /* , formEndpoint: 'https://formspree.io/f/xxxx' */ },
+      postsPerPage: 4,
+      ui: { readMore: 'Seguir leyendo' },
+    }),
+  ],
+});

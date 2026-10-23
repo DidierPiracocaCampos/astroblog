@@ -1,6 +1,8 @@
 {
   "name": "@didierp/astroblog",
   "version": "0.0.0",
+  "description": "Integración de Astro que convierte un proyecto en un blog estático completo, listo para AdSense y Cloudflare Pages.",
+  "keywords": ["astro-integration", "astro", "blog", "adsense", "daisyui", "withastro"],
   "type": "module",
   "engines": {
     "node": ">=22.23.0"
@@ -15,15 +17,19 @@
     "index.ts",
     "content.ts",
     "components.ts",
+    "virtual.d.ts",
     "schema",
     "lib",
+    "i18n",
     "routes",
     "components",
     "layouts",
     "legal",
-    "styles",
-    "integrations"
+    "styles"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "vitest run"
   },
