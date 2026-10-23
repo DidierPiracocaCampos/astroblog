@@ -1,0 +1,30 @@
+{
+  "name": "@didierp/astroblog",
+  "version": "0.0.0",
+  "type": "module",
+  "engines": { "node": ">=22.23.0" },
+  "exports": {
+    ".": "./index.ts",
+    "./content": "./content.ts",
+    "./components": "./components.ts",
+    "./styles": "./styles/global.css"
+  },
+  "files": ["index.ts", "content.ts", "components.ts", "schema", "lib", "routes", "components", "layouts", "styles", "integrations"],
+  "scripts": { "test": "vitest run" },
+  "peerDependencies": { "astro": "^7.4.0" },
+  "dependencies": {
+    "@astrojs/mdx": "^8.1.1",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/vite": "^4.3.3",
+    "daisyui": "^5.7.50",
+    "pagefind": "^1.5.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "astro": "^7.4.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
