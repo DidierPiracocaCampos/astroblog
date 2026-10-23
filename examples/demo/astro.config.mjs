@@ -21,7 +21,7 @@ export default defineConfig({
       },
       owner: { name: 'Laura Gómez', country: 'España', email: 'legal@astroblog-demo.pages.dev' },
       social: {
-        github: 'https://github.com/didierp/astroblog',
+        github: 'https://github.com/DidierPiracocaCampos/astroblog',
         // x: 'https://x.com/usuario',
         // linkedin: 'https://www.linkedin.com/in/usuario',
       },

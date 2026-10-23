@@ -15,4 +15,4 @@ description: "Quién escribe Cuaderno Web, de qué trata el blog y cómo ponerse
 
 Si tienes una duda, una corrección o una propuesta, escríbeme desde la página de contacto. Leo todos los mensajes y respondo en cuanto puedo.
 
-> Este sitio es una demostración de [@didierp/astroblog](https://github.com/didierp/astroblog): los artículos y la autora son ficticios.
+> Este sitio es una demostración de [@didierp/astroblog](https://github.com/DidierPiracocaCampos/astroblog): los artículos y la autora son ficticios.

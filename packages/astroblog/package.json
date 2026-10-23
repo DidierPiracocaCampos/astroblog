@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/didierp/astroblog.git",
+    "url": "git+https://github.com/DidierPiracocaCampos/astroblog.git",
     "directory": "packages/astroblog"
   },
-  "homepage": "https://github.com/didierp/astroblog/tree/main/packages/astroblog#readme",
+  "homepage": "https://github.com/DidierPiracocaCampos/astroblog/tree/main/packages/astroblog#readme",
   "bugs": {
-    "url": "https://github.com/didierp/astroblog/issues"
+    "url": "https://github.com/DidierPiracocaCampos/astroblog/issues"
   },
   "type": "module",
   "engines": {

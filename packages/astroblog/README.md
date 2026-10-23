@@ -299,7 +299,7 @@ export interface Props { currentPath: string }
 
 // `routes.paths` son relativas a `base`: antepón import.meta.env.BASE_URL para que los enlaces
 // funcionen también con `base: '/blog'`.
-const base = import.meta.env.BASE_URL.replace(//$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const href = (path: string) => `${base}${path}`;
 ---
 <header class="navbar">
