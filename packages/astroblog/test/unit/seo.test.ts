@@ -5,6 +5,7 @@ import {
   jsonLdWebsite,
   jsonLdPost,
   jsonLdBreadcrumbs,
+  absoluteImage,
 } from '../../lib/seo';
 
 describe('absoluteUrl', () => {
@@ -116,5 +117,18 @@ describe('json-ld', () => {
     expect(r['@type']).toBe('BreadcrumbList');
     expect(r.itemListElement.map((i: any) => i.position)).toEqual([1, 2]);
     expect(r.itemListElement[1].item).toBe('https://x.com/p/');
+  });
+});
+
+describe('absoluteImage', () => {
+  it('makes relative images absolute against site and base', () => {
+    expect(absoluteImage('https://x.com/', '/blog', '/og.png')).toBe('https://x.com/blog/og.png');
+  });
+  it('keeps already absolute images', () => {
+    expect(absoluteImage(undefined, '/', 'https://cdn.x.com/a.png')).toBe('https://cdn.x.com/a.png');
+  });
+  it('omits relative images when site is unset', () => {
+    expect(absoluteImage(undefined, '/', '/og.png')).toBeUndefined();
+    expect(absoluteImage('https://x.com', '/', undefined)).toBeUndefined();
   });
 });

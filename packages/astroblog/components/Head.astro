@@ -3,7 +3,7 @@
 // meta → OG/Twitter/JSON-LD → theme script → consent default → CMP → AdSense → GA4.
 // The global CSS link is appended by Astro after this content (imported in BaseLayout).
 import config from 'virtual:astroblog/config';
-import { absoluteUrl, buildMeta } from '../lib/seo';
+import { absoluteImage, absoluteUrl, buildMeta } from '../lib/seo';
 import { adsenseScript, ga4Scripts } from '../lib/consent';
 import { stripBase } from '../lib/routes';
 import { themeScript } from '../lib/theme';
@@ -24,7 +24,8 @@ const base = import.meta.env.BASE_URL;
 const site = Astro.site?.href;
 // Without `site` there is no absolute URL: canonical and og:url are omitted.
 const canonical = site ? absoluteUrl(site, base, stripBase(base, Astro.url.pathname)) : undefined;
-const absImage = image && site && !/^https?:\/\//.test(image) ? absoluteUrl(site, base, image) : image;
+// Relative images need `site` too: without it og:image/twitter:image are omitted.
+const absImage = absoluteImage(site, base, image);
 
 const { title: fullTitle, meta } = buildMeta({
   title,

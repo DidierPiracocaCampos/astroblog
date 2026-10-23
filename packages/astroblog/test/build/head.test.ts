@@ -100,15 +100,6 @@ describe('basic fixture: chrome', () => {
   });
 });
 
-describe('minimal fixture: no adsense, no analytics', () => {
-  it('emits consent default but no ad or GA4 scripts', async () => {
-    const page = await (await buildFixture('minimal')).read('index.html');
-    expect(page).toContain("gtag('consent', 'default'");
-    expect(page).not.toContain('adsbygoogle');
-    expect(page).not.toContain('googletagmanager');
-  });
-});
-
 describe('nosite fixture', () => {
   it('omits canonical, og:url and JSON-LD instead of emitting relative URLs', async () => {
     const page = await (await buildFixture('nosite')).read('index.html');

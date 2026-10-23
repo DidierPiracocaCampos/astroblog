@@ -36,14 +36,19 @@ const bundle = withBase(import.meta.env.BASE_URL, 'pagefind/');
         const script = document.createElement('script');
         script.src = `${bundle}pagefind-ui.js`;
         script.onload = () => {
-          const PagefindUI = (window as any).PagefindUI;
-          new PagefindUI({
-            element: '#astroblog-search-ui',
-            bundlePath: bundle,
-            showSubResults: true,
-            translations: placeholder ? { placeholder } : undefined,
-          });
-          resolve();
+          try {
+            const PagefindUI = (window as any).PagefindUI;
+            new PagefindUI({
+              element: '#astroblog-search-ui',
+              bundlePath: bundle,
+              showSubResults: true,
+              translations: placeholder ? { placeholder } : undefined,
+            });
+            resolve();
+          } catch (e) {
+            loading = undefined;
+            reject(e);
+          }
         };
         script.onerror = () => {
           loading = undefined;

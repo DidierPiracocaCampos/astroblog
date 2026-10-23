@@ -108,3 +108,13 @@ export function jsonLdBreadcrumbs(items: { name: string; url: string }[]): objec
     })),
   };
 }
+
+/**
+ * Absolute URL for an OG/Twitter image: absolute inputs are kept; relative ones are resolved
+ * against `site` + `base`, or dropped (undefined) when `site` is unset, like canonical/og:url.
+ */
+export function absoluteImage(site: string | undefined, base: string, image: string | undefined): string | undefined {
+  if (!image) return undefined;
+  if (/^https?:\/\//i.test(image)) return image;
+  return site ? absoluteUrl(site, base, image) : undefined;
+}

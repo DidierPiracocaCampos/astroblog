@@ -5,7 +5,7 @@ import 'virtual:astroblog/styles';
 import config from 'virtual:astroblog/config';
 import { Breadcrumbs, Footer, Header, Search } from 'virtual:astroblog/components';
 import Head from '../components/Head.astro';
-import { absoluteUrl, jsonLdBreadcrumbs, jsonLdWebsite } from '../lib/seo';
+import { absoluteImage, absoluteUrl, jsonLdBreadcrumbs, jsonLdWebsite } from '../lib/seo';
 
 export interface Props {
   title: string;
@@ -26,7 +26,7 @@ const site = Astro.site?.href;
 // Structured data needs absolute URLs: emitted only when `site` is set.
 const structured: object[] = [];
 if (site) {
-  const logo = config.logo ? (/^https?:\/\//.test(config.logo) ? config.logo : absoluteUrl(site, base, config.logo)) : undefined;
+  const logo = absoluteImage(site, base, config.logo);
   structured.push(jsonLdWebsite({
     name: config.title,
     url: absoluteUrl(site, base, '/'),
