@@ -7,7 +7,7 @@ import type { MarkdownHeading } from 'astro';
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
 import routes from 'virtual:astroblog/routes';
-import { AuthorBox, PostHeader, RelatedPosts, ShareLinks, TableOfContents } from 'virtual:astroblog/components';
+import { AuthorBox, Comments, PostHeader, RelatedPosts, ShareLinks, TableOfContents } from 'virtual:astroblog/components';
 import BaseLayout from './BaseLayout.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { authorOf, slugify } from '../lib/posts';
@@ -85,6 +85,7 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       />
     )}
   </div>
+  {config.comments?.giscus && <div class="mx-auto max-w-3xl"><Comments /></div>}
   <RelatedPosts posts={related} />
   {toc.length >= 3 && <TableOfContents slot="aside" headings={toc} />}
 </BaseLayout>

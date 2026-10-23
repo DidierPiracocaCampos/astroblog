@@ -4,6 +4,7 @@ import {
   adsenseScript, cmpHead, consentDefaultScript, ga4Scripts, reopenScript,
 } from '../../lib/consent';
 import { onConsent } from '../../lib/consent-client';
+import { mountConsentGates } from '../../lib/consent-gate-client';
 
 const w = window as any;
 
@@ -147,5 +148,80 @@ describe('onConsent', () => {
     w.__tcfapi = (cmd: string, _v: number, fn: any) => { if (cmd === 'addEventListener') fn({ eventStatus: 'tcloaded', gdprApplies: false }, true); };
     onConsent('google', 'statistics', cb);
     expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  describe('google TCF defined late', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('subscribes once __tcfapi appears after onConsent ran', () => {
+      vi.useFakeTimers();
+      const cb = vi.fn();
+      onConsent('google', 'marketing', cb);
+      vi.advanceTimersByTime(1000);
+      expect(cb).not.toHaveBeenCalled();
+      w.__tcfapi = (cmd: string, _v: number, fn: any) => { if (cmd === 'addEventListener') fn({ eventStatus: 'tcloaded', gdprApplies: false }, true); };
+      vi.advanceTimersByTime(250);
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it('gives up silently after ~10s', () => {
+      vi.useFakeTimers();
+      const cb = vi.fn();
+      onConsent('google', 'marketing', cb);
+      vi.advanceTimersByTime(11_000);
+      const api = vi.fn((cmd: string, _v: number, fn: any) => fn({ eventStatus: 'tcloaded', gdprApplies: false }, true));
+      w.__tcfapi = api;
+      vi.advanceTimersByTime(5000);
+      expect(api).not.toHaveBeenCalled();
+      expect(cb).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+  });
+});
+
+describe('mountConsentGates', () => {
+  afterEach(() => {
+    delete w.__astroblogConsent;
+    document.body.innerHTML = '';
+  });
+
+  const markup = `<div data-consent-root>
+    <div role="alert" data-consent-placeholder>needs consent</div>
+    <template data-consent-gate data-provider="custom" data-category="preferences">
+      <script src="https://giscus.app/client.js" data-repo="a/b" crossorigin="anonymous" async></script>
+      <p id="inner">hello</p>
+    </template>
+  </div>`;
+
+  it('keeps the placeholder and content locked until consent', () => {
+    document.body.innerHTML = markup;
+    mountConsentGates();
+    expect(document.querySelector('[data-consent-placeholder]')).not.toBeNull();
+    expect(document.getElementById('inner')).toBeNull();
+    expect(document.querySelector('script')).toBeNull();
+  });
+
+  it('on consent replaces the placeholder with the content, recreating scripts', () => {
+    document.body.innerHTML = markup;
+    const original = document.querySelector<HTMLTemplateElement>('template')!.content.querySelector('script')!;
+    mountConsentGates();
+    window.dispatchEvent(new CustomEvent('astroblog:consent', { detail: { categories: ['preferences'] } }));
+    expect(document.querySelector('[data-consent-placeholder]')).toBeNull();
+    expect(document.querySelector('template')).toBeNull();
+    expect(document.getElementById('inner')?.textContent).toBe('hello');
+    const script = document.querySelector('script')!;
+    expect(script).not.toBe(original);
+    expect(script.getAttribute('src')).toBe('https://giscus.app/client.js');
+    expect(script.getAttribute('data-repo')).toBe('a/b');
+    expect(script.getAttribute('crossorigin')).toBe('anonymous');
+    expect(script.hasAttribute('async')).toBe(true);
+  });
+
+  it('unlocks immediately when consent was already granted', () => {
+    w.__astroblogConsent = ['preferences'];
+    document.body.innerHTML = markup;
+    mountConsentGates();
+    expect(document.getElementById('inner')).not.toBeNull();
+    expect(document.querySelector('[data-consent-placeholder]')).toBeNull();
   });
 });

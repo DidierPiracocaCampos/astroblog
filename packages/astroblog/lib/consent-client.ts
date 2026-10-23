@@ -3,6 +3,9 @@ import type { ConsentProvider } from '../schema/config';
 
 export type ConsentCategory = 'marketing' | 'statistics' | 'preferences';
 
+const TCF_POLL_MS = 250;
+const TCF_POLL_MAX_MS = 10_000;
+
 const COOKIEYES_CATEGORY: Record<ConsentCategory, string> = {
   marketing: 'advertisement',
   statistics: 'analytics',
@@ -51,7 +54,6 @@ export function onConsent(provider: ConsentProvider, category: ConsentCategory, 
       return;
     }
     case 'google': {
-      if (typeof w.__tcfapi !== 'function') return;
       const listener = (tcData: any, success: boolean) => {
         if (!success || done || !tcData) return;
         if (tcData.eventStatus !== 'useractioncomplete' && tcData.eventStatus !== 'tcloaded') return;
@@ -62,7 +64,19 @@ export function onConsent(provider: ConsentProvider, category: ConsentCategory, 
           fire();
         }
       };
-      w.__tcfapi('addEventListener', 2, listener);
+      // Google's CMP defines __tcfapi asynchronously: poll for it, then give up silently.
+      const subscribe = () => w.__tcfapi('addEventListener', 2, listener);
+      if (typeof w.__tcfapi === 'function') return subscribe();
+      let waited = 0;
+      const timer = setInterval(() => {
+        waited += TCF_POLL_MS;
+        if (typeof w.__tcfapi === 'function') {
+          clearInterval(timer);
+          subscribe();
+        } else if (waited >= TCF_POLL_MAX_MS) {
+          clearInterval(timer);
+        }
+      }, TCF_POLL_MS);
       return;
     }
     case 'custom': {
