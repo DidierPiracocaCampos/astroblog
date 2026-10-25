@@ -85,7 +85,11 @@ Todas las opciones se validan al iniciar Astro (`astro:config:setup`). Los error
 | `description` | `string` | — (obligatorio) | Descripción del sitio (portada, RSS, JSON-LD). |
 | `lang` | `'es' \| 'en'` | `'es'` | Idioma de los textos UI, las plantillas legales, los segmentos de URL y los mensajes de error. |
 | `logo` | `string` | — | Ruta **pública** del logo (p. ej. `'/logo.svg'` en `public/`), mostrado junto al título y usado en el JSON-LD. |
-| `author` | `{ name: string; email?: string; url?: string; avatar?: string }` | — | Autor por defecto de los posts. `avatar` es una ruta pública. |
+| `author` | `{ name: string; email?: string; url?: string; avatar?: string; bio?: string; jobTitle?: string; sameAs?: string[] }` | — | Autor por defecto de los posts. `avatar` es una ruta pública. `jobTitle` y `bio` se muestran en la ficha del autor y en `/acerca/`; `jobTitle` y `sameAs` (perfiles externos) van al JSON-LD del post. |
+| `reviewers` | `Record<string, { name: string; jobTitle?: string; url?: string; bio?: string; avatar?: string }>` | — | Revisores expertos (YMYL), referenciados por su clave desde el campo `reviewer` del post. Si tienen `url`, el nombre enlaza a ella. |
+| `disclaimer` | `string` | — | Aviso que se muestra al final de cada post (p. ej. «no constituye asesoramiento financiero»). |
+| `seo.articleType` | `'BlogPosting' \| 'Article'` | `'BlogPosting'` | Tipo schema.org del JSON-LD de los posts. |
+| `permalinks` | `'blog' \| 'silo'` | `'blog'` | `silo` publica los posts en `/<categoria>/<slug>/` y cada categoría en `/<categoria>/`. Ver [Silos](#silos). |
 | `owner` | `{ name: string; country?: string; email?: string }` | — | Titular del sitio para las páginas legales, el copyright y el *publisher* del JSON-LD. |
 | `social` | `Record<string, string>` | — | Enlaces sociales del pie: la clave es el texto del enlace y el valor la URL (`{ github: 'https://…' }`). |
 | `nav` | `{ label: string; href: string }[]` | `[]` | Menú principal. `href` relativo a la raíz del sitio (se le añade `base` y la barra final). |
@@ -140,6 +144,8 @@ Claves disponibles (valores por defecto en español):
 | `categories` | Categorías | `backHome` | Volver al inicio |
 | `tags` | Etiquetas | `emptyBlog` | Todavía no hay artículos publicados. |
 | `author` | Autor | `publishedOn` | Publicado el |
+| `reviewedBy` | Revisado por | `faqTitle` | Preguntas frecuentes |
+| `sourcesTitle` | Fuentes | `disclaimerTitle` | Aviso |
 | `search` | Buscar | `updatedOn` | Actualizado el |
 | `searchPlaceholder` | Buscar en el blog… | `advertisement` | Publicidad |
 | `noResults` | No se encontraron resultados | `contactFormName` | Nombre |
@@ -185,6 +191,20 @@ Todas las páginas usan **barra final** (`/acerca/`, `/blog/mi-post/`), igual qu
 
 Además se generan `sitemap-index.xml` (`@astrojs/sitemap`), `pagefind/` (si `search`) y `_headers`.
 
+### Silos
+
+Con `permalinks: 'silo'` la URL la decide la `category` del post, no la carpeta del archivo (`src/content/blog/requisitos/edad.md` y `src/content/blog/edad.md` con `category: Requisitos` acaban ambos en `/requisitos/edad/`):
+
+| Página | URL |
+|---|---|
+| Listado de la categoría | `/<categoria>/` |
+| Página *n* (n ≥ 2) del listado | `/<categoria>/pagina/<n>/` (`/page/<n>/` en inglés, o el valor de `slugs.page`) |
+| Post | `/<categoria>/<slug>/` (`<slug>` = nombre del archivo) |
+
+Nada se publica en `/blog/` ni en `/categoria/`; tarjetas, migas, canónicas, RSS y sitemap usan estas URLs. `routes.post` y `routes.category` se ignoran (con un aviso). Las páginas de `src/pages/` tienen prioridad sobre las del silo.
+
+El build falla con un mensaje claro si una categoría produce un slug reservado (`acerca`, `contacto`, `privacidad`, `cookies`, `terminos`, `aviso-legal`, `buscar`, `etiqueta`, `autor`, `pagina`, `404` o lo que pongas en `slugs`) o ninguno (`"???"`), si dos posts producen la misma URL o si el slug de un post es `pagina`.
+
 ## Contenido (frontmatter)
 
 ### Posts (`src/content/blog/*.md` o `.mdx`)
@@ -215,6 +235,23 @@ coverAlt: Degradado de colores que representa la velocidad
 | `tags` | `string[]` | no | Por defecto `[]`. |
 | `draft` | `boolean` | no | Por defecto `false`. Los borradores solo se ven en `astro dev`. |
 | `noAds` | `boolean` | no | Por defecto `false`. Quita los anuncios `inArticle` y `afterPost` de ese post. |
+| `reviewer` | `string` | no | Clave de `reviewers` en la config (error de build si no existe). Muestra «Revisado por…» en la cabecera y una ficha tras el contenido, y emite `reviewedBy` en el JSON-LD. |
+| `reviewedDate` | fecha | no | Fecha de la revisión (`lastReviewed` en el JSON-LD). |
+| `faq` | `{ q: string; a: string }[]` | no | Preguntas frecuentes tras el contenido (desplegables accesibles sin JavaScript) y JSON-LD `FAQPage`. `a` admite Markdown en línea: `**negrita**`, `*cursiva*`, `` `código` `` y `[enlaces](https://…)`; el HTML se escapa. |
+| `sources` | `{ title: string; url: string }[]` | no | Fuentes consultadas, enlazadas con `rel="nofollow noopener"` en una pestaña nueva. |
+
+```yaml
+reviewer: luis
+reviewedDate: 2026-10-20
+faq:
+  - q: ¿Hasta qué edad se puede firmar una hipoteca?
+    a: La mayoría de bancos exige terminar de pagar antes de los **75 años**.
+sources:
+  - title: Portal del Cliente Bancario
+    url: https://clientebancario.bde.es
+```
+
+Tras el contenido se muestran, en este orden: FAQ, fuentes, revisor y `disclaimer`; después, la ficha del autor, los enlaces para compartir, los relacionados y los comentarios.
 
 Si el título o la descripción contienen `:`, ponlos entre comillas (es YAML). El índice de contenidos aparece cuando el post tiene al menos 3 encabezados `h2`/`h3`.
 
@@ -285,6 +322,11 @@ La ruta es relativa a la raíz del proyecto. Tu componente recibe **exactamente 
 | `Breadcrumbs` | `items: { name: string; href: string }[]` (`href` relativo a `base`) |
 | `Pagination` | `currentPage: number`, `urls: string[]` |
 | `Comments` | — |
+| `Faq` | `items: { q: string; a: string }[]` |
+| `Sources` | `items: { title: string; url: string }[]` |
+| `ReviewedBy` | `reviewer: { name: string; jobTitle?: string; url?: string; bio?: string; avatar?: string }`, `date?: Date` |
+
+`AuthorBox` recibe además `jobTitle?: string` y `bio?: string`.
 
 Desde tus componentes puedes importar la configuración resuelta y los textos (los tipos se inyectan automáticamente):
 
@@ -312,6 +354,34 @@ const href = (path: string) => `${base}${path}`;
 `@didierp/astroblog/components` exporta todos los componentes originales (para envolverlos o reutilizarlos) y los de sistema, que no se pueden sustituir: `Head`, `ConsentManager`, `ConsentGate` (prop `category: 'marketing' | 'statistics' | 'preferences'`), `CookieSettingsLink` (prop `class?`) y `AdSlot` (props `slot?`, `format?: 'auto' | 'fluid' | 'rectangle'`, `layout?`, `minHeight?` en px; no pinta nada sin `adsense` o sin `slot`, y en `astro dev` muestra un marcador «Publicidad»).
 
 Para reemplazar una página entera, crea tu página en `src/pages/` y desactiva la inyectada con `routes.<clave>: false` (si no lo haces, verás un aviso de colisión).
+
+### Páginas propias con layouts
+
+`@didierp/astroblog/layouts` exporta `BaseLayout` (cabecera, pie, búsqueda, `<head>` con SEO y JSON-LD) y `PageLayout` (lo mismo con un artículo `prose` y el título como `<h1>`), para crear páginas con el aspecto del sitio: una portada a medida, una metodología o una calculadora.
+
+| Prop | Tipo | Notas |
+|---|---|---|
+| `title` | `string` | Obligatoria. `<title>` y `og:title`. |
+| `description` | `string` | Obligatoria. |
+| `image` | `string` | Imagen OG (ruta pública o URL absoluta). |
+| `type` | `'website' \| 'article'` | Por defecto `website`. |
+| `breadcrumbs` | `{ name: string; href: string }[]` | Migas y JSON-LD `BreadcrumbList`; `href` relativo a `base`. |
+| `jsonLd` | `object[]` | JSON-LD adicional. |
+| `noindex` | `boolean` | Añade `noindex`. |
+| `noAds` | `boolean` | El layout no inserta anuncios propios: la página coloca sus `AdSlot` donde quiera. |
+| `updatedDate` | `Date` | Solo `PageLayout`: «Actualizado el…» bajo el título. |
+
+Portada propia: desactiva la inyectada y crea `src/pages/index.astro`:
+
+```astro
+---
+// astro.config.mjs: astroblog({ ..., routes: { home: false } })
+import { BaseLayout } from '@didierp/astroblog/layouts';
+---
+<BaseLayout title="Hipotecas Claras" description="Guías de hipotecas revisadas por expertos.">
+  <h1>Elige tu guía</h1>
+</BaseLayout>
+```
 
 ## Consentimiento
 
