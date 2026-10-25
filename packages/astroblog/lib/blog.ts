@@ -5,6 +5,7 @@ import type { PaginateFunction } from 'astro';
 import config from 'virtual:astroblog/config';
 import { noPostsWarning } from '../schema/validate';
 import { groupByTaxonomy, publishedPosts, withDefaultAuthor } from './posts';
+import { postIssues } from './silo';
 
 export type BlogPost = CollectionEntry<'blog'>;
 
@@ -21,6 +22,8 @@ async function load(): Promise<BlogPost[]> {
     entries = [];
   }
   const posts = publishedPosts(entries, { includeDrafts: import.meta.env.DEV });
+  const issues = postIssues(posts, config);
+  if (issues.length) throw new Error(issues.map((m) => `[astroblog] ${m}`).join('\n'));
   // `validateConfig` cannot know about posts in astro:config:setup: warn here, once per build.
   if (!import.meta.env.DEV && posts.length === 0) warn(noPostsWarning(config.lang));
   return posts;
