@@ -1,3 +1,5 @@
+import { inlineText } from './inline-md';
+
 export function absoluteUrl(site: string, base: string, path: string): string {
   const origin = site.replace(/\/+$/, '');
   const baseSeg = base.replace(/^\/+|\/+$/g, '');
@@ -75,14 +77,18 @@ export function jsonLdPost(c: {
   image?: string;
   datePublished: Date;
   dateModified?: Date;
-  author: { name: string; url?: string };
+  author: { name: string; url?: string; jobTitle?: string; sameAs?: string[] };
   publisherName: string;
+  /** `seo.articleType` (default `BlogPosting`). */
+  type?: 'BlogPosting' | 'Article';
 }): object {
   const author: Record<string, unknown> = { '@type': 'Person', name: c.author.name };
   if (c.author.url) author.url = c.author.url;
+  if (c.author.jobTitle) author.jobTitle = c.author.jobTitle;
+  if (c.author.sameAs?.length) author.sameAs = c.author.sameAs;
   const out: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    '@type': c.type ?? 'BlogPosting',
     headline: c.title,
     description: c.description,
     mainEntityOfPage: c.url,
@@ -93,6 +99,33 @@ export function jsonLdPost(c: {
     publisher: { '@type': 'Organization', name: c.publisherName },
   };
   if (c.image) out.image = c.image;
+  return out;
+}
+
+/** FAQPage for a post's `faq`; answers as plain text (inline Markdown removed). */
+export function jsonLdFaq(faq: { q: string; a: string }[]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: inlineText(a) },
+    })),
+  };
+}
+
+/** WebPage with `reviewedBy` (and `lastReviewed` as a YYYY-MM-DD date) for a reviewed post. */
+export function jsonLdReviewedPage(c: {
+  url: string;
+  reviewer: { name: string; jobTitle?: string; url?: string };
+  lastReviewed?: Date;
+}): object {
+  const reviewedBy: Record<string, unknown> = { '@type': 'Person', name: c.reviewer.name };
+  if (c.reviewer.jobTitle) reviewedBy.jobTitle = c.reviewer.jobTitle;
+  if (c.reviewer.url) reviewedBy.url = c.reviewer.url;
+  const out: Record<string, unknown> = { '@context': 'https://schema.org', '@type': 'WebPage', url: c.url, reviewedBy };
+  if (c.lastReviewed) out.lastReviewed = c.lastReviewed.toISOString().slice(0, 10);
   return out;
 }
 

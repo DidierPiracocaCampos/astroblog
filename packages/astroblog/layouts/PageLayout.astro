@@ -1,19 +1,25 @@
 ---
-// Simple content page (institutional pages, etc.): BaseLayout + a `prose` article with the title as <h1>.
+// Simple content page (institutional pages, the project's own pages via `@didierp/astroblog/layouts`):
+// BaseLayout + a `prose` article with the title as <h1> and, when given, the `updatedDate` line.
 // The `aside` slot is only forwarded when given: a conditionally forwarded slot would still count as
 // present in BaseLayout and render an empty sidebar column.
 import BaseLayout from './BaseLayout.astro';
 import type { Props as BaseProps } from './BaseLayout.astro';
+import Updated from '../legal/Updated.astro';
 
-export type Props = BaseProps;
+export interface Props extends BaseProps {
+  /** Shown as "Updated on <date>" under the title. */
+  updatedDate?: Date;
+}
 
-const props = Astro.props;
+const { updatedDate, ...props } = Astro.props;
 const hasAside = Astro.slots.has('aside');
 ---
 {hasAside ? (
   <BaseLayout {...props}>
     <article class="prose mx-auto max-w-3xl">
       <h1>{props.title}</h1>
+      {updatedDate && <Updated date={updatedDate} />}
       <slot />
     </article>
     <slot name="aside" slot="aside" />
@@ -22,6 +28,7 @@ const hasAside = Astro.slots.has('aside');
   <BaseLayout {...props}>
     <article class="prose mx-auto max-w-3xl">
       <h1>{props.title}</h1>
+      {updatedDate && <Updated date={updatedDate} />}
       <slot />
     </article>
   </BaseLayout>

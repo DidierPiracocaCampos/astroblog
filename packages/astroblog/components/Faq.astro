@@ -1,0 +1,26 @@
+---
+// Overridable: `components.Faq`. The post's `faq` as daisyUI `collapse` items (details/summary: works
+// without JavaScript) in a `join join-vertical`. Answers accept inline Markdown (lib/inline-md).
+// PostLayout also emits the FAQPage JSON-LD.
+import ui from 'virtual:astroblog/ui';
+import { inlineMarkdown } from '../lib/inline-md';
+
+export interface Props {
+  items: { q: string; a: string }[];
+}
+
+const { items } = Astro.props;
+---
+{items.length > 0 && (
+  <section class="mt-12" aria-labelledby="faq-title">
+    <h2 id="faq-title" class="mb-4 text-2xl font-bold">{ui.faqTitle}</h2>
+    <div class="join join-vertical w-full">
+      {items.map(({ q, a }) => (
+        <details class="collapse collapse-arrow join-item border border-base-300 bg-base-100">
+          <summary class="collapse-title font-semibold">{q}</summary>
+          <div class="collapse-content"><p set:html={inlineMarkdown(a)} /></div>
+        </details>
+      ))}
+    </div>
+  </section>
+)}

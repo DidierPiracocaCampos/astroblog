@@ -21,7 +21,7 @@ describe('parseConfig', () => {
     expect(() => parseConfig({ ...base, adsense: { client: 'pub-1' } })).toThrow(/ca-pub/));
   it('rejects unknown component key', () =>
     expect(() => parseConfig({ ...base, components: { Foo: './x.astro' } })).toThrow(/Foo/));
-  it('exposes 13 component keys', () => expect(COMPONENT_KEYS).toHaveLength(13));
+  it('exposes 16 component keys', () => expect(COMPONENT_KEYS).toHaveLength(16));
   it('exposes issues with path', () => {
     try { parseConfig({ ...base, adsense: { client: 'x' } }); expect.unreachable(); }
     catch (e) {
@@ -115,5 +115,38 @@ describe('validateConfig', () => {
     const r = validateConfig(c, {});
     expect(r.errors[0]).toMatch(/site/);
     expect(r.errors[0]).toMatch(/requires/);
+  });
+});
+
+describe('0.2: silos y YMYL (config)', () => {
+  it('defaults permalinks to blog and leaves seo unset', () => {
+    const c = parseConfig(base);
+    expect(c.permalinks).toBe('blog');
+    expect(c.seo).toBeUndefined();
+  });
+  it('accepts silo permalinks and rejects unknown values', () => {
+    expect(parseConfig({ ...base, permalinks: 'silo' }).permalinks).toBe('silo');
+    expect(() => parseConfig({ ...base, permalinks: 'x' })).toThrow(AstroblogConfigError);
+  });
+  it('accepts reviewers, disclaimer, seo and the new author fields', () => {
+    const c = parseConfig({
+      ...base,
+      author: { name: 'Ana', bio: 'Economista', jobTitle: 'Asesora', sameAs: ['https://linkedin.com/in/ana'] },
+      reviewers: { luis: { name: 'Luis', jobTitle: 'Notario', url: 'https://luis.es' } },
+      disclaimer: 'No es asesoramiento financiero.',
+      seo: { articleType: 'Article' },
+    });
+    expect(c.author).toMatchObject({ jobTitle: 'Asesora', bio: 'Economista', sameAs: ['https://linkedin.com/in/ana'] });
+    expect(c.reviewers?.luis).toEqual({ name: 'Luis', jobTitle: 'Notario', url: 'https://luis.es' });
+    expect(c.disclaimer).toBe('No es asesoramiento financiero.');
+    expect(c.seo?.articleType).toBe('Article');
+    expect(() => parseConfig({ ...base, seo: { articleType: 'NewsArticle' } })).toThrow(AstroblogConfigError);
+    expect(() => parseConfig({ ...base, reviewers: { x: { jobTitle: 'sin nombre' } } })).toThrow(AstroblogConfigError);
+  });
+  it('warns that routes.post/category are ignored in silo mode', () => {
+    const w = validateConfig(parseConfig({ ...base, permalinks: 'silo', routes: { post: false, category: false } }), {}).warnings;
+    expect(w.join('\n')).toMatch(/routes\.post/);
+    expect(w.join('\n')).toMatch(/routes\.category/);
+    expect(validateConfig(parseConfig({ ...base, routes: { post: false } }), {}).warnings.join()).not.toMatch(/silo/);
   });
 });

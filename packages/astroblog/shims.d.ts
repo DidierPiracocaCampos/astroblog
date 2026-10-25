@@ -17,6 +17,8 @@ declare module 'astro:content' {
     data: {
       title: string; description: string; pubDate: Date; updatedDate?: Date;
       category: string; tags: string[]; draft: boolean; noAds: boolean; author?: string;
+      reviewer?: string; reviewedDate?: Date;
+      faq?: { q: string; a: string }[]; sources?: { title: string; url: string }[];
     };
   };
   export function getCollection<C extends string>(collection: C): Promise<CollectionEntry<C>[]>;

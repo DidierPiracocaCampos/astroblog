@@ -115,6 +115,8 @@ export function buildVirtualModules(
   for (const key of ROUTE_KEYS) {
     if (resolveRoutes(config).some((r) => r.key === key)) paths[key] = routePath(config, key);
   }
+  // Silo mode lists categories at the top level (`/<cat>/`) through the `post` route.
+  if (config.permalinks === 'silo') paths.category = routePath(config, 'category');
 
   const modules = {
     'virtual:astroblog/config': exportDefault(config),

@@ -1,0 +1,36 @@
+---
+// Overridable: `components.ReviewedBy`. The post's reviewer (an entry of `reviewers`): name, linked to
+// `url` when set, job title, bio and review date. PostLayout also emits `reviewedBy` JSON-LD.
+import config from 'virtual:astroblog/config';
+import ui from 'virtual:astroblog/ui';
+import { formatDate } from '../lib/posts';
+import { withBase } from '../lib/routes';
+
+export interface Props {
+  reviewer: { name: string; jobTitle?: string; url?: string; bio?: string; avatar?: string };
+  date?: Date;
+}
+
+const { reviewer, date } = Astro.props;
+const src = reviewer.avatar ? withBase(import.meta.env.BASE_URL, reviewer.avatar) : undefined;
+---
+<section class="card card-border bg-base-200 mt-10" aria-label={ui.reviewedBy} data-pagefind-ignore>
+  <div class="card-body flex-row items-center gap-4">
+    {src && (
+      <div class="avatar">
+        <div class="w-12 rounded-full">
+          <img src={src} alt="" width="48" height="48" loading="lazy" />
+        </div>
+      </div>
+    )}
+    <div class="flex flex-col gap-1">
+      <span class="text-xs uppercase tracking-wide text-base-content/70">{ui.reviewedBy}</span>
+      <span class="font-semibold">
+        {reviewer.url ? <a href={reviewer.url} class="link link-hover" rel="noopener" target="_blank">{reviewer.name}</a> : reviewer.name}
+        {reviewer.jobTitle && <span class="font-normal text-base-content/70"> · {reviewer.jobTitle}</span>}
+      </span>
+      {reviewer.bio && <p class="text-sm text-base-content/80">{reviewer.bio}</p>}
+      {date && <time class="text-sm text-base-content/70" datetime={date.toISOString()}>{formatDate(date, config.lang)}</time>}
+    </div>
+  </div>
+</section>

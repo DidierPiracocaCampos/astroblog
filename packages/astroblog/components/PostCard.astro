@@ -8,7 +8,7 @@ import ui from 'virtual:astroblog/ui';
 import routes from 'virtual:astroblog/routes';
 import { t } from '../i18n/index';
 import { formatDate, readingTime } from '../lib/posts';
-import { routePath, taxonomyPath, withBase } from '../lib/routes';
+import { postPath, taxonomyPath, withBase } from '../lib/routes';
 
 export interface Props {
   post: CollectionEntry<'blog'>;
@@ -20,7 +20,7 @@ const { post, headingLevel = 2 } = Astro.props;
 const Heading = headingLevel === 3 ? 'h3' : 'h2';
 const { title, description, pubDate, cover, coverAlt, category } = post.data;
 const base = import.meta.env.BASE_URL;
-const href = withBase(base, routePath(config, 'post', post.id));
+const href = withBase(base, postPath(config, post));
 const categoryPath = taxonomyPath(routes.paths, 'category', category);
 const minutes = readingTime(post.body ?? '');
 ---

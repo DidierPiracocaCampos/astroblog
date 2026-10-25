@@ -54,6 +54,12 @@ export default defineConfig({
       // components: { Header: './src/components/MiHeader.astro' },
       // routes: { terms: false },
       // slugs: { category: 'temas', tag: 'etiquetas' },
+      // Silos: posts en /<categoria>/<slug>/ y cada categoría en /<categoria>/ (en vez de /blog/ y /categoria/).
+      // permalinks: 'silo',
+      // Señales YMYL: revisores (campo `reviewer` del post), aviso al final de cada post y tipo de JSON-LD.
+      // reviewers: { luis: { name: 'Luis Gómez', jobTitle: 'Notario', url: 'https://example.com/luis' } },
+      // disclaimer: 'Este contenido es informativo y no constituye asesoramiento profesional.',
+      // seo: { articleType: 'Article' },
       search: true,
       contact: { email: 'contacto@astroblog-demo.pages.dev' /* , formEndpoint: 'https://formspree.io/f/xxxx' */ },
       postsPerPage: 4,

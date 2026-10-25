@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 import rss from '@astrojs/rss';
 import config from 'virtual:astroblog/config';
 import { loadPosts } from '../lib/blog';
-import { routePath } from '../lib/routes';
+import { postPath } from '../lib/routes';
 import { absoluteUrl } from '../lib/seo';
 
 export const GET: APIRoute = async ({ site }) => {
@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ site }) => {
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.pubDate,
-      link: url(routePath(config, 'post', post.id)),
+      link: url(postPath(config, post)),
       categories: [post.data.category, ...post.data.tags],
     })),
     customData: `<language>${config.lang}</language>`,

@@ -6,6 +6,8 @@ import {
   jsonLdPost,
   jsonLdBreadcrumbs,
   absoluteImage,
+  jsonLdFaq,
+  jsonLdReviewedPage,
 } from '../../lib/seo';
 
 describe('absoluteUrl', () => {
@@ -130,5 +132,42 @@ describe('absoluteImage', () => {
   it('omits relative images when site is unset', () => {
     expect(absoluteImage(undefined, '/', '/og.png')).toBeUndefined();
     expect(absoluteImage('https://x.com', '/', undefined)).toBeUndefined();
+  });
+});
+
+describe('json-ld YMYL (0.2)', () => {
+  const post = { title: 'T', description: 'd', url: 'https://x.com/p/', datePublished: new Date('2026-01-01'), publisherName: 'P' };
+  it('uses the configured article type and author credentials', () => {
+    const r = jsonLdPost({
+      ...post,
+      type: 'Article',
+      author: { name: 'A', jobTitle: 'Economista', sameAs: ['https://linkedin.com/in/a'] },
+    }) as any;
+    expect(r['@type']).toBe('Article');
+    expect(r.author).toEqual({ '@type': 'Person', name: 'A', jobTitle: 'Economista', sameAs: ['https://linkedin.com/in/a'] });
+    expect((jsonLdPost({ ...post, author: { name: 'A', sameAs: [] } }) as any).author).toEqual({ '@type': 'Person', name: 'A' });
+  });
+  it('builds FAQPage with plain-text answers', () => {
+    expect(jsonLdFaq([{ q: '¿Edad?', a: 'Hasta **75** años, ver [BdE](https://bde.es).' }])).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [{ '@type': 'Question', name: '¿Edad?', acceptedAnswer: { '@type': 'Answer', text: 'Hasta 75 años, ver BdE.' } }],
+    });
+  });
+  it('builds a reviewed WebPage', () => {
+    expect(jsonLdReviewedPage({
+      url: 'https://x.com/p/',
+      reviewer: { name: 'Luis', jobTitle: 'Notario', url: 'https://luis.es' },
+      lastReviewed: new Date('2026-03-01T00:00:00.000Z'),
+    })).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      url: 'https://x.com/p/',
+      reviewedBy: { '@type': 'Person', name: 'Luis', jobTitle: 'Notario', url: 'https://luis.es' },
+      lastReviewed: '2026-03-01',
+    });
+    expect(jsonLdReviewedPage({ url: 'u', reviewer: { name: 'L' } })).toEqual({
+      '@context': 'https://schema.org', '@type': 'WebPage', url: 'u', reviewedBy: { '@type': 'Person', name: 'L' },
+    });
   });
 });

@@ -21,12 +21,14 @@
     ".": "./index.ts",
     "./content": "./content.ts",
     "./components": "./components.ts",
+    "./layouts": "./layouts.ts",
     "./styles": "./styles/global.css"
   },
   "files": [
     "index.ts",
     "content.ts",
     "components.ts",
+    "layouts.ts",
     "virtual.d.ts",
     "schema",
     "lib",
