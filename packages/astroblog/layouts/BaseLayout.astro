@@ -19,8 +19,15 @@ export interface Props {
   jsonLd?: object[];
   /** Not indexable (404): see Head. */
   noindex?: boolean;
+  /**
+   * The page places its own `AdSlot`s (or none): the layout inserts no ad units of its own. Auto ads
+   * still follow the AdSense account settings (the script also carries Google's consent platform).
+   */
+  noAds?: boolean;
 }
 
+// Public API (`@didierp/astroblog/layouts`): title, description, image, type, breadcrumbs, jsonLd,
+// noindex and noAds are stable props for the project's own pages.
 const { title, description, image, type, publishedTime, modifiedTime, breadcrumbs = [], jsonLd = [], noindex } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const site = Astro.site?.href;
