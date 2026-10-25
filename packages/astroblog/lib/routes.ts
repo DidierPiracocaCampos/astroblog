@@ -31,7 +31,12 @@ function slug(config: ResolvedConfig, key: SlugKey): string {
   return clean || DEFAULT_SLUGS[config.lang][key];
 }
 
+const silo = (config: ResolvedConfig) => config.permalinks === 'silo';
+
 function enabled(config: ResolvedConfig, key: RouteKey): boolean {
+  // Silo mode serves posts and category listings from one `/[...path]` route (keyed `post`).
+  if (silo(config) && key === 'post') return true;
+  if (silo(config) && key === 'category') return false;
   if (config.routes?.[key] === false) return false;
   if (key === 'adsTxt') return Boolean(config.adsense);
   if (key === 'search') return config.search;
@@ -45,7 +50,10 @@ function routesFor(config: ResolvedConfig, key: RouteKey): ResolvedRoute[] {
         { key, pattern: '/', entry: 'index.astro' },
         { key, pattern: `/${slug(config, 'page')}/[page]`, entry: 'page.astro' },
       ];
-    case 'post': return [{ key, pattern: '/blog/[...slug]', entry: 'post.astro' }];
+    case 'post':
+      return silo(config)
+        ? [{ key, pattern: '/[...path]', entry: 'silo.astro' }]
+        : [{ key, pattern: '/blog/[...slug]', entry: 'post.astro' }];
     case 'category': return [{ key, pattern: `/${slug(config, 'category')}/[cat]/[...page]`, entry: 'category.astro' }];
     case 'tag': return [{ key, pattern: `/${slug(config, 'tag')}/[tag]/[...page]`, entry: 'tag.astro' }];
     case 'author': return [{ key, pattern: `/${slug(config, 'author')}/[author]`, entry: 'author.astro' }];
@@ -88,8 +96,8 @@ export function routePath(config: ResolvedConfig, key: RouteKey, param?: string)
   const withParam = (prefix: string) => (param ? `${prefix}/${param.replace(/^\/+|\/+$/g, '')}/` : `${prefix}/`);
   switch (key) {
     case 'home': return '/';
-    case 'post': return withParam('/blog');
-    case 'category': return withParam(`/${slug(config, 'category')}`);
+    case 'post': return withParam(silo(config) ? '' : '/blog');
+    case 'category': return withParam(silo(config) ? '' : `/${slug(config, 'category')}`);
     case 'tag': return withParam(`/${slug(config, 'tag')}`);
     case 'author': return withParam(`/${slug(config, 'author')}`);
     case 'notFound': return '/404';
@@ -129,9 +137,37 @@ export function taxonomyPath(
   key: 'category' | 'tag' | 'author',
   label: string,
 ): string | undefined {
-  const section = paths[key]?.replace(/\/+$/, '');
+  const section = paths[key]?.replace(/\/+$/, ''); // '' for the root section of silo mode
   const s = slugify(label);
-  return section && s ? `${section}/${s}/` : undefined;
+  return section !== undefined && s ? `${section}/${s}/` : undefined;
+}
+
+/** Last segment of a post id: its slug in silo mode (`requisitos/edad` → `edad`). */
+export function postSlug(id: string): string {
+  return id.replace(/\/+$/, '').split('/').pop()!;
+}
+
+/**
+ * Base-relative path of a post page: `/blog/<id>/`, or `/<category slug>/<post slug>/` in silo mode
+ * (the file's folder does not count; `category` decides the silo).
+ */
+export function postPath(config: ResolvedConfig, post: { id: string; data: { category: string } }): string {
+  if (!silo(config)) return routePath(config, 'post', post.id);
+  return `/${slugify(post.data.category)}/${postSlug(post.id)}/`;
+}
+
+/**
+ * Prefix of a taxonomy listing's pages 2..n: `path` itself (`/categoria/x/2/`), or `path` + the
+ * page slug for a silo (`/x/pagina/2/`), whose `/x/<slug>/` paths belong to posts.
+ */
+export function taxonomyPagesPrefix(config: ResolvedConfig, path: string): string {
+  return silo(config) ? `${path.replace(/\/+$/, '')}/${slug(config, 'page')}` : path;
+}
+
+/** Top-level slugs a silo category cannot take: astroblog's own sections and pages, and `404`. */
+export function reservedSlugs(config: ResolvedConfig): string[] {
+  const keys = Object.keys(DEFAULT_SLUGS[config.lang]) as SlugKey[];
+  return [...keys.filter((k) => k !== 'category').map((k) => slug(config, k)), '404'];
 }
 
 /** Base-relative paths of pages 1..lastPage: page 1 is `first`, page n is `${prefix}/n/`. */

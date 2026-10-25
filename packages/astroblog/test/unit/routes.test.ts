@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseConfig } from '../../schema/config';
-import { resolveRoutes, routePath, stripBase, withBase } from '../../lib/routes';
+import { postPath, postSlug, reservedSlugs, resolveRoutes, routePath, stripBase, taxonomyPagesPrefix, taxonomyPath, withBase } from '../../lib/routes';
 
 const base = { title: 'T', description: 'D' };
 const patterns = (c: unknown) => resolveRoutes(parseConfig(c)).map((x) => x.pattern);
@@ -93,5 +93,49 @@ describe('stripBase', () => {
     expect(stripBase('/blog/', '/blog/')).toBe('/');
     expect(stripBase('/blog', '/blog')).toBe('/');
     expect(stripBase('/blog', '/blogger')).toBe('/blogger');
+  });
+});
+
+describe('silo permalinks (0.2)', () => {
+  const silo = parseConfig({ ...base, permalinks: 'silo' });
+  const blog = parseConfig(base);
+  const post = { id: 'requisitos/edad', data: { category: 'Requisitos' } };
+
+  it('injects one /[...path] route instead of post and category', () => {
+    const r = resolveRoutes(silo);
+    expect(r.map((x) => x.pattern)).not.toContain('/blog/[...slug]');
+    expect(r.map((x) => x.pattern)).not.toContain('/categoria/[cat]/[...page]');
+    expect(r.filter((x) => x.entry === 'silo.astro')).toEqual([{ key: 'post', pattern: '/[...path]', entry: 'silo.astro' }]);
+    expect(r.map((x) => x.pattern)).toEqual(expect.arrayContaining(['/', '/etiqueta/[tag]/[...page]', '/acerca']));
+  });
+  it('ignores routes.post/category: false in silo mode', () => {
+    const r = resolveRoutes(parseConfig({ ...base, permalinks: 'silo', routes: { post: false, category: false } }));
+    expect(r.find((x) => x.entry === 'silo.astro')).toBeDefined();
+  });
+  it('postPath follows the mode; the folder never decides the URL', () => {
+    expect(postPath(blog, post)).toBe('/blog/requisitos/edad/');
+    expect(postPath(silo, post)).toBe('/requisitos/edad/');
+    expect(postPath(silo, { id: 'edad', data: { category: 'Gastos y Tasación' } })).toBe('/gastos-y-tasacion/edad/');
+    expect(postSlug('a/b/c')).toBe('c');
+  });
+  it('routePath(category) is the root section in silo mode', () => {
+    expect(routePath(silo, 'category')).toBe('/');
+    expect(routePath(silo, 'category', 'gastos')).toBe('/gastos/');
+  });
+  it('taxonomyPath handles a root section', () => {
+    expect(taxonomyPath({ category: '/' }, 'category', 'Requisitos')).toBe('/requisitos/');
+    expect(taxonomyPath({ category: '/categoria/' }, 'category', 'Requisitos')).toBe('/categoria/requisitos/');
+    expect(taxonomyPath({}, 'category', 'Requisitos')).toBeUndefined();
+    expect(taxonomyPath({ category: '/' }, 'category', '???')).toBeUndefined();
+  });
+  it('taxonomyPagesPrefix puts the page slug inside the silo', () => {
+    expect(taxonomyPagesPrefix(silo, '/requisitos/')).toBe('/requisitos/pagina');
+    expect(taxonomyPagesPrefix(blog, '/categoria/requisitos/')).toBe('/categoria/requisitos/');
+    expect(taxonomyPagesPrefix(parseConfig({ ...base, permalinks: 'silo', lang: 'en' }), '/x/')).toBe('/x/page');
+  });
+  it('reservedSlugs lists institutional, system and overridden slugs', () => {
+    expect(reservedSlugs(silo)).toEqual(expect.arrayContaining(
+      ['acerca', 'contacto', 'privacidad', 'cookies', 'terminos', 'aviso-legal', 'buscar', 'etiqueta', 'autor', 'pagina', '404']));
+    expect(reservedSlugs(parseConfig({ ...base, slugs: { about: 'quienes-somos' } }))).toContain('quienes-somos');
   });
 });
