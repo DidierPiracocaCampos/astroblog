@@ -27,6 +27,9 @@ declare module 'virtual:astroblog/components' {
   export const Breadcrumbs: Component;
   export const Pagination: Component;
   export const Comments: Component;
+  export const Faq: Component;
+  export const Sources: Component;
+  export const ReviewedBy: Component;
 }
 
 declare module 'virtual:astroblog/routes' {

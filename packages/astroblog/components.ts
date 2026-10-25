@@ -13,6 +13,9 @@ export { default as AuthorBox } from './components/AuthorBox.astro';
 export { default as Breadcrumbs } from './components/Breadcrumbs.astro';
 export { default as Pagination } from './components/Pagination.astro';
 export { default as Comments } from './components/Comments.astro';
+export { default as Faq } from './components/Faq.astro';
+export { default as Sources } from './components/Sources.astro';
+export { default as ReviewedBy } from './components/ReviewedBy.astro';
 // System components
 export { default as Head } from './components/Head.astro';
 export { default as ConsentManager } from './components/ConsentManager.astro';

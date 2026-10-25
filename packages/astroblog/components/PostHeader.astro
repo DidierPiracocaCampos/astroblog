@@ -25,6 +25,8 @@ const author = authorOf(post, config.author?.name);
 const authorHref = author ? link('author', author) : undefined;
 const categoryHref = link('category', category);
 const minutes = readingTime(post.body ?? '');
+const reviewer = post.data.reviewer ? config.reviewers?.[post.data.reviewer] : undefined;
+const { reviewedDate } = post.data;
 ---
 <header class="mb-8 flex flex-col gap-4">
   <div class="flex flex-wrap gap-2">
@@ -43,6 +45,12 @@ const minutes = readingTime(post.body ?? '');
     <span>{ui.publishedOn} <time datetime={pubDate.toISOString()}>{formatDate(pubDate, config.lang)}</time></span>
     {updatedDate && <span>{ui.updatedOn} <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate, config.lang)}</time></span>}
     <span>{t(ui.readingTime, { n: minutes })}</span>
+    {reviewer && (
+      <span>
+        {ui.reviewedBy} {reviewer.name}{reviewer.jobTitle && ` · ${reviewer.jobTitle}`}
+        {reviewedDate && <> (<time datetime={reviewedDate.toISOString()}>{formatDate(reviewedDate, config.lang)}</time>)</>}
+      </span>
+    )}
   </div>
   {cover && (
     <figure>

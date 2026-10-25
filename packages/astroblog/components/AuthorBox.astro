@@ -12,9 +12,12 @@ export interface Props {
   url?: string;
   /** Avatar image: absolute URL or a path relative to `base` (e.g. in `public/`). */
   avatar?: string;
+  /** `author.jobTitle` and `author.bio`, shown under the name when set. */
+  jobTitle?: string;
+  bio?: string;
 }
 
-const { name, href, url, avatar } = Astro.props;
+const { name, href, url, avatar, jobTitle, bio } = Astro.props;
 const src = avatar ? withBase(import.meta.env.BASE_URL, avatar) : undefined;
 const initial = [...name.trim()][0]?.toUpperCase() ?? '';
 ---
@@ -36,6 +39,8 @@ const initial = [...name.trim()][0]?.toUpperCase() ?? '';
     <div class="flex flex-col gap-1">
       <span class="text-xs uppercase tracking-wide text-base-content/70">{ui.author}</span>
       {href ? <a href={href} class="link link-hover text-lg font-semibold">{name}</a> : <span class="text-lg font-semibold">{name}</span>}
+      {jobTitle && <span class="text-sm text-base-content/70">{jobTitle}</span>}
+      {bio && <p class="text-sm text-base-content/80">{bio}</p>}
       {url && <a href={url} class="link link-primary text-sm" rel="author noopener" target="_blank">{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>}
     </div>
   </div>

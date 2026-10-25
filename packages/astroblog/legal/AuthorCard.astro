@@ -30,6 +30,8 @@ const initial = [...name.trim()][0]?.toUpperCase() ?? '';
   )}
   <div class="flex flex-col gap-1">
     <span class="text-xl font-semibold">{name}</span>
+    {author?.jobTitle && <span class="text-base-content/70">{author.jobTitle}</span>}
+    {author?.bio && <p class="max-w-prose text-base-content/80">{author.bio}</p>}
     {author?.url && <a href={author.url} class="link link-primary text-sm" rel="author noopener">{author.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a>}
   </div>
 </div>

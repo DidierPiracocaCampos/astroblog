@@ -29,6 +29,10 @@ export interface UIStrings {
   emptyBlog: string;
   publishedOn: string;
   updatedOn: string;
+  reviewedBy: string;
+  faqTitle: string;
+  sourcesTitle: string;
+  disclaimerTitle: string;
   advertisement: string;
   contactFormName: string;
   contactFormEmail: string;

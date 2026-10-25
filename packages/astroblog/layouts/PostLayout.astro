@@ -7,12 +7,14 @@ import type { MarkdownHeading } from 'astro';
 import config from 'virtual:astroblog/config';
 import ui from 'virtual:astroblog/ui';
 import routes from 'virtual:astroblog/routes';
-import { AuthorBox, Comments, PostHeader, RelatedPosts, ShareLinks, TableOfContents } from 'virtual:astroblog/components';
+import {
+  AuthorBox, Comments, Faq, PostHeader, RelatedPosts, ReviewedBy, ShareLinks, Sources, TableOfContents,
+} from 'virtual:astroblog/components';
 import BaseLayout from './BaseLayout.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { authorOf, slugify } from '../lib/posts';
-import { routePath, stripBase, taxonomyPath, withBase } from '../lib/routes';
-import { absoluteImage, absoluteUrl, jsonLdPost } from '../lib/seo';
+import { postPath, stripBase, taxonomyPath, withBase } from '../lib/routes';
+import { absoluteImage, absoluteUrl, jsonLdFaq, jsonLdPost, jsonLdReviewedPage } from '../lib/seo';
 
 export interface Props {
   post: CollectionEntry<'blog'>;
@@ -36,11 +38,15 @@ const categoryPath = taxonomyPath(routes.paths, 'category', category);
 const breadcrumbs = [
   { name: ui.home, href: '/' },
   ...(categoryPath ? [{ name: category, href: categoryPath }] : []),
-  { name: title, href: routePath(config, 'post', post.id) },
+  { name: title, href: postPath(config, post) },
 ];
+
+const { faq, sources, reviewedDate } = post.data;
+const reviewer = post.data.reviewer ? config.reviewers?.[post.data.reviewer] : undefined;
 
 const jsonLd = site && url
   ? [jsonLdPost({
+      type: config.seo?.articleType,
       title,
       description,
       url,
@@ -50,9 +56,14 @@ const jsonLd = site && url
       author: {
         name: author ?? config.owner?.name ?? config.title,
         url: authorPath ? absoluteUrl(site, base, authorPath) : profile?.url,
+        jobTitle: profile?.jobTitle,
+        sameAs: profile?.sameAs,
       },
       publisherName: config.owner?.name ?? config.author?.name ?? config.title,
-    })]
+    }),
+    ...(faq?.length ? [jsonLdFaq(faq)] : []),
+    ...(reviewer ? [jsonLdReviewedPage({ url, reviewer, lastReviewed: reviewedDate })] : []),
+  ]
   : [];
 
 const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
@@ -72,6 +83,15 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     <div class="prose max-w-none">
       <slot />
     </div>
+    {faq && <Faq items={faq} />}
+    {sources && <Sources items={sources} />}
+    {reviewer && <ReviewedBy reviewer={reviewer} date={reviewedDate} />}
+    {config.disclaimer && (
+      <aside class="alert alert-info alert-soft mt-10 flex-col items-start gap-1" role="note" data-disclaimer>
+        <strong>{ui.disclaimerTitle}</strong>
+        <p>{config.disclaimer}</p>
+      </aside>
+    )}
   </article>
   <div class="mx-auto max-w-3xl">
     {!noAds && <AdSlot slot={config.adsense?.slots?.afterPost} />}
@@ -82,6 +102,8 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
         href={authorPath ? withBase(base, authorPath) : undefined}
         url={profile?.url}
         avatar={profile?.avatar}
+        jobTitle={profile?.jobTitle}
+        bio={profile?.bio}
       />
     )}
   </div>
