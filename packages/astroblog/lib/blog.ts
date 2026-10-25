@@ -1,10 +1,11 @@
 // Blog collection access shared by the injected routes (runs inside the Astro build/dev server).
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import type { PaginateFunction } from 'astro';
+import type { Page, PaginateFunction } from 'astro';
 import config from 'virtual:astroblog/config';
 import { noPostsWarning } from '../schema/validate';
-import { groupByTaxonomy, publishedPosts, withDefaultAuthor } from './posts';
+import { groupByTaxonomy, lengthWarnings, publishedPosts, relatedPosts, withDefaultAuthor } from './posts';
+import { homePagesPrefix, postPath } from './routes';
 import { postIssues } from './silo';
 
 export type BlogPost = CollectionEntry<'blog'>;
@@ -76,6 +77,48 @@ export async function taxonomyStaticPaths(
   const groups = groupByTaxonomy(await loadPosts(), field, warn);
   return [...groups].flatMap(([slug, g]) =>
     paginate(g.posts, { params: { [param]: slug }, props: { label: g.label }, pageSize }));
+}
+
+/**
+ * Every published post with its related posts, for the post routes (`post.astro`, `silo.astro`).
+ * Emits the SEO length warnings once per post (`getStaticPaths` runs once per build).
+ */
+export async function postEntries(): Promise<{ post: BlogPost; related: BlogPost[] }[]> {
+  const posts = await loadPosts();
+  for (const post of posts) for (const warning of lengthWarnings(post, config.lang)) console.warn(warning);
+  return posts.map((post) => ({ post, related: relatedPosts(post, posts, 3) }));
+}
+
+/** The part of Astro's `Page` that TaxonomyLayout reads. */
+export type ListingPage = Pick<Page<BlogPost>, 'data' | 'currentPage' | 'lastPage'>;
+
+export type SiloProps =
+  | { kind: 'post'; post: BlogPost; related: BlogPost[] }
+  | { kind: 'category'; label: string; page: ListingPage };
+
+/**
+ * `getStaticPaths` result for the silo route (`/[...path]`): each category's listing at `<cat>`
+ * (page n ≥ 2 at `<cat>/<page slug>/<n>`) and each post at `<cat>/<slug>`. Collisions were
+ * rejected by `loadPosts`.
+ */
+export async function siloStaticPaths(pageSize: number): Promise<{ params: { path: string }; props: SiloProps }[]> {
+  const pageSlug = homePagesPrefix(config).slice(1);
+  const listings = [...groupByTaxonomy(await loadPosts(), 'category', warn)].flatMap(([cat, g]) => {
+    const lastPage = Math.max(1, Math.ceil(g.posts.length / pageSize));
+    return Array.from({ length: lastPage }, (_, i) => ({
+      params: { path: i === 0 ? cat : `${cat}/${pageSlug}/${i + 1}` },
+      props: {
+        kind: 'category' as const,
+        label: g.label,
+        page: { data: g.posts.slice(i * pageSize, (i + 1) * pageSize), currentPage: i + 1, lastPage },
+      },
+    }));
+  });
+  const posts = (await postEntries()).map(({ post, related }) => ({
+    params: { path: postPath(config, post).replace(/^\/+|\/+$/g, '') },
+    props: { kind: 'post' as const, post, related },
+  }));
+  return [...listings, ...posts];
 }
 
 /** Author groups (posts without `author` count as `fallback`, the site's `author.name`). */

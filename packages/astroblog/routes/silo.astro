@@ -1,0 +1,22 @@
+---
+// Silo mode (`permalinks: 'silo'`, route `/[...path]`): category listings at `/<cat>/` (page n at
+// `/<cat>/<page slug>/<n>/`) and posts at `/<cat>/<slug>/`, rendered like category.astro and post.astro.
+// The project's static pages (`src/pages/calculadoras/`) take priority over this rest route.
+import { render } from 'astro:content';
+import config from 'virtual:astroblog/config';
+import PostLayout from '../layouts/PostLayout.astro';
+import TaxonomyLayout from '../layouts/TaxonomyLayout.astro';
+import { siloStaticPaths } from '../lib/blog';
+import type { SiloProps } from '../lib/blog';
+
+export function getStaticPaths() {
+  return siloStaticPaths(config.postsPerPage);
+}
+
+const props = Astro.props as SiloProps;
+const rendered = props.kind === 'post' ? await render(props.post) : undefined;
+const Content = rendered?.Content;
+---
+{props.kind === 'post' && Content
+  ? <PostLayout post={props.post} headings={rendered.headings} related={props.related}><Content /></PostLayout>
+  : props.kind === 'category' && <TaxonomyLayout kind="category" label={props.label} page={props.page} />}
