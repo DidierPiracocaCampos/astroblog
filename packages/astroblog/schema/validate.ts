@@ -7,6 +7,7 @@ const T = {
     noPosts: 'No hay posts publicados; la portada mostrará un estado vacío.',
     routeDisabled: (r: string) => `La ruta recomendada por AdSense "${r}" está desactivada.`,
     privacyWithAdsense: 'adsense está activo pero routes.privacy es false: AdSense exige una política de privacidad.',
+    siloIgnores: (key: string) => `permalinks es "silo": se ignora \`routes.${key}: false\` (en modo silo no hay rutas /blog/ ni de categoría aparte). Si no quieres silos, usa permalinks: "blog".`,
     noCmp: 'consent.provider es "google" pero no hay adsense: la plataforma de gestión del consentimiento de Google solo se carga con AdSense, así que GA4 seguirá con el consentimiento denegado y Giscus no se desbloqueará. Configura adsense u otra CMP (consent.provider: "cookiebot", "cookieyes" o "custom").',
   },
   en: {
@@ -14,6 +15,7 @@ const T = {
     noPosts: 'There are no published posts; the home page will show an empty state.',
     routeDisabled: (r: string) => `The AdSense-recommended route "${r}" is disabled.`,
     privacyWithAdsense: 'adsense is enabled but routes.privacy is false: AdSense requires a privacy policy.',
+    siloIgnores: (key: string) => `permalinks is "silo": \`routes.${key}: false\` is ignored (silo mode has no separate /blog/ or category routes). If you do not want silos, use permalinks: "blog".`,
     noCmp: 'consent.provider is "google" but adsense is not set: Google\'s consent management platform only loads with AdSense, so GA4 will stay with consent denied and Giscus will never unlock. Configure adsense or another consent management platform (consent.provider: "cookiebot", "cookieyes" or "custom").',
   },
 } as const;
@@ -39,6 +41,11 @@ export function validateConfig(
     if (config.routes?.[r] === false) warnings.push(t.routeDisabled(r));
   }
   if (config.adsense && config.routes?.privacy === false) warnings.push(t.privacyWithAdsense);
+  if (config.permalinks === 'silo') {
+    for (const key of ['post', 'category'] as const) {
+      if (config.routes?.[key] === false) warnings.push(t.siloIgnores(key));
+    }
+  }
   if (!hasCmp(config) && (config.analytics?.ga4 || config.comments?.giscus)) warnings.push(t.noCmp);
 
   return { errors, warnings };

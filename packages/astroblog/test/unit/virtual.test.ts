@@ -27,7 +27,7 @@ const STYLES = posix(join(tmp, 'gen', 'styles.css'));
 describe('components module', () => {
   it('defaults every component to the package', () => {
     const m = buildComponentsModule({}, root, pkg);
-    expect(m.split('\n').filter(Boolean)).toHaveLength(13);
+    expect(m.split('\n').filter(Boolean)).toHaveLength(16);
     expect(m).toContain('export { default as Header } from "');
     expect(m).toContain(`export { default as Header } from "${PKG}/components/Header.astro";`);
     expect(m).not.toContain(BS);

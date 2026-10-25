@@ -20,6 +20,11 @@ export function blogSchema({ image }: BlogSchemaContext) {
       tags: z.array(z.string()).default([]),
       draft: z.boolean().default(false),
       noAds: z.boolean().default(false),
+      // YMYL signals: `reviewer` is an id of the site's `reviewers` (checked by loadPosts).
+      reviewer: z.string().optional(),
+      reviewedDate: z.coerce.date().optional(),
+      faq: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
+      sources: z.array(z.object({ title: z.string(), url: z.string() })).optional(),
     })
     .superRefine((data, ctx) => {
       if (data.cover !== undefined && !data.coverAlt) {

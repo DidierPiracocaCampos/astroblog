@@ -3,6 +3,7 @@ import { z } from 'astro/zod';
 export const COMPONENT_KEYS = [
   'Header', 'Footer', 'ThemeToggle', 'Search', 'PostCard', 'PostHeader', 'TableOfContents',
   'RelatedPosts', 'ShareLinks', 'AuthorBox', 'Breadcrumbs', 'Pagination', 'Comments',
+  'Faq', 'Sources', 'ReviewedBy',
 ] as const;
 export type ComponentKey = (typeof COMPONENT_KEYS)[number];
 
@@ -89,7 +90,15 @@ function buildSchema(lang: Lang) {
     logo: z.string().optional(),
     author: z.object({
       name: z.string(), email: z.string().optional(), url: z.string().optional(), avatar: z.string().optional(),
+      bio: z.string().optional(), jobTitle: z.string().optional(), sameAs: z.array(z.string()).optional(),
     }).optional(),
+    reviewers: z.record(z.string(), z.object({
+      name: z.string(), jobTitle: z.string().optional(), url: z.string().optional(),
+      bio: z.string().optional(), avatar: z.string().optional(),
+    })).optional(),
+    disclaimer: z.string().optional(),
+    seo: z.object({ articleType: z.enum(['BlogPosting', 'Article']).optional() }).optional(),
+    permalinks: z.enum(['blog', 'silo']).default('blog'),
     owner: z.object({
       name: z.string(), country: z.string().optional(), email: z.string().optional(),
     }).optional(),

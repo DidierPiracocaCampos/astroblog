@@ -48,3 +48,25 @@ describe('collections', () => {
     expect(p.safeParse({}).success).toBe(false);
   });
 });
+
+describe('blogSchema: campos YMYL (0.2)', () => {
+  it('accepts reviewer, reviewedDate, faq and sources', () => {
+    const r = s.parse({
+      ...valid,
+      reviewer: 'luis',
+      reviewedDate: '2026-03-01',
+      faq: [{ q: '¿Edad máxima?', a: 'Suele ser **75 años** al final del préstamo.' }],
+      sources: [{ title: 'Banco de España', url: 'https://www.bde.es' }],
+    });
+    expect(r.reviewer).toBe('luis');
+    expect(r.reviewedDate).toBeInstanceOf(Date);
+    expect(r.faq).toHaveLength(1);
+    expect(r.sources?.[0].url).toBe('https://www.bde.es');
+  });
+  it('rejects malformed faq and sources', () => {
+    expect(s.safeParse({ ...valid, faq: [{ q: 'x' }] }).success).toBe(false);
+    expect(s.safeParse({ ...valid, sources: [{ title: 'x' }] }).success).toBe(false);
+  });
+  it('leaves the new fields undefined when absent', () =>
+    expect(s.parse(valid)).not.toHaveProperty('faq'));
+});
