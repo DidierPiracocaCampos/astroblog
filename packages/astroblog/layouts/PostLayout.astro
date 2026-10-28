@@ -44,6 +44,7 @@ const breadcrumbs = [
 const { faq, sources, reviewedDate } = post.data;
 const reviewer = post.data.reviewer ? config.reviewers?.[post.data.reviewer] : undefined;
 
+const siteUrl = site ? absoluteUrl(site, base, '/') : undefined;
 const jsonLd = site && url
   ? [jsonLdPost({
       type: config.seo?.articleType,
@@ -53,13 +54,22 @@ const jsonLd = site && url
       image: absoluteImage(site, base, image),
       datePublished: pubDate,
       dateModified: updatedDate,
-      author: {
-        name: author ?? config.owner?.name ?? config.title,
-        url: authorPath ? absoluteUrl(site, base, authorPath) : profile?.url,
-        jobTitle: profile?.jobTitle,
-        sameAs: profile?.sameAs,
-      },
-      publisherName: config.owner?.name ?? config.author?.name ?? config.title,
+      ...(author
+        ? {
+            author: {
+              name: author,
+              url: authorPath ? absoluteUrl(site, base, authorPath) : profile?.url,
+              jobTitle: profile?.jobTitle,
+              sameAs: profile?.sameAs,
+            },
+            publisherName: config.owner?.name ?? config.author?.name ?? config.title,
+          }
+        : {
+            // No author configured: attribute to the site as an Organization, never to the legal owner.
+            author: { name: config.title, url: siteUrl, type: 'Organization' as const },
+            publisherName: config.title,
+            publisher: { name: config.title, url: siteUrl },
+          }),
     }),
     ...(faq?.length ? [jsonLdFaq(faq)] : []),
     ...(reviewer ? [jsonLdReviewedPage({ url, reviewer, lastReviewed: reviewedDate })] : []),

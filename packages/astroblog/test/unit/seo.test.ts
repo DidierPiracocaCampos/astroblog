@@ -110,6 +110,30 @@ describe('json-ld', () => {
     expect(r2.image).toBe('i');
     expect(r2.author.url).toBe('au');
   });
+  it('emits Organization author and publisher when asked', () => {
+    const r = jsonLdPost({
+      title: 'T',
+      description: 'd',
+      url: 'https://x.com/p/',
+      datePublished: new Date('2026-01-01T00:00:00.000Z'),
+      author: { name: 'Sitio', url: 'https://x.com/', type: 'Organization' },
+      publisherName: 'P',
+      publisher: { name: 'Sitio', url: 'https://x.com/' },
+    }) as any;
+    expect(r.author).toEqual({ '@type': 'Organization', name: 'Sitio', url: 'https://x.com/' });
+    expect(r.publisher).toEqual({ '@type': 'Organization', name: 'Sitio', url: 'https://x.com/' });
+  });
+  it('ignores jobTitle on an Organization author', () => {
+    const r = jsonLdPost({
+      title: 'T',
+      description: 'd',
+      url: 'u',
+      datePublished: new Date('2026-01-01T00:00:00.000Z'),
+      author: { name: 'Sitio', type: 'Organization', jobTitle: 'Editor' },
+      publisherName: 'P',
+    }) as any;
+    expect(r.author.jobTitle).toBeUndefined();
+  });
   it('numbers breadcrumbs from 1', () => {
     const r = jsonLdBreadcrumbs([
       { name: 'Home', url: 'https://x.com/' },
