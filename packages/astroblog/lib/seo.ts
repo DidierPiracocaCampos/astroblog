@@ -77,15 +77,23 @@ export function jsonLdPost(c: {
   image?: string;
   datePublished: Date;
   dateModified?: Date;
-  author: { name: string; url?: string; jobTitle?: string; sameAs?: string[] };
+  author: { name: string; url?: string; jobTitle?: string; sameAs?: string[]; type?: 'Person' | 'Organization' };
   publisherName: string;
+  /** Organization publisher; takes precedence over `publisherName`. */
+  publisher?: { name: string; url?: string };
   /** `seo.articleType` (default `BlogPosting`). */
   type?: 'BlogPosting' | 'Article';
 }): object {
-  const author: Record<string, unknown> = { '@type': 'Person', name: c.author.name };
+  const authorType = c.author.type ?? 'Person';
+  const author: Record<string, unknown> = { '@type': authorType, name: c.author.name };
   if (c.author.url) author.url = c.author.url;
-  if (c.author.jobTitle) author.jobTitle = c.author.jobTitle;
+  if (c.author.jobTitle && authorType === 'Person') author.jobTitle = c.author.jobTitle;
   if (c.author.sameAs?.length) author.sameAs = c.author.sameAs;
+  const publisher: Record<string, unknown> = {
+    '@type': 'Organization',
+    name: c.publisher?.name ?? c.publisherName,
+  };
+  if (c.publisher?.url) publisher.url = c.publisher.url;
   const out: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': c.type ?? 'BlogPosting',
@@ -96,7 +104,7 @@ export function jsonLdPost(c: {
     datePublished: c.datePublished.toISOString(),
     dateModified: (c.dateModified ?? c.datePublished).toISOString(),
     author,
-    publisher: { '@type': 'Organization', name: c.publisherName },
+    publisher,
   };
   if (c.image) out.image = c.image;
   return out;
