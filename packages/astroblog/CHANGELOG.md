@@ -1,5 +1,11 @@
 # @didierp/astroblog
 
+## 0.3.0
+
+### Minor Changes
+
+- f5b4f65: Sin autor configurado, el JSON-LD de los posts atribuye el contenido a la organización del sitio (`config.title`) en lugar de a una Person con el nombre del titular.
+
 ## 0.2.0
 
 ### Minor Changes
