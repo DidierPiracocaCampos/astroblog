@@ -1,0 +1,31 @@
+name: Bug
+description: Algo no funciona como dice la documentación / Something doesn't work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué pasa
+      description: Qué esperabas y qué ocurre en su lugar. Incluye el error completo si lo hay.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Cómo reproducirlo
+      description: Pasos mínimos, o un enlace a un repositorio que lo reproduzca.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuración
+      description: La llamada a `astroblog({ … })` de tu `astro.config.mjs` (sin datos privados).
+      render: js
+  - type: input
+    id: versiones
+    attributes:
+      label: Versiones
+      placeholder: "@didierp/astroblog 0.3.0, astro 7.4.2, Node 22.23.4, Windows/macOS/Linux"
+    validations:
+      required: true

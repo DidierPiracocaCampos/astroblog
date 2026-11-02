@@ -1,0 +1,21 @@
+name: Propuesta
+description: Propón una funcionalidad o mejora / Suggest a feature or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema
+      description: Qué necesitas hacer y por qué no puedes hacerlo hoy.
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Cómo te imaginas la solución (opción de configuración, componente, ruta…).
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas
+      description: Otras soluciones o soluciones temporales que hayas considerado.

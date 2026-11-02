@@ -4,6 +4,10 @@
   "description": "Integración de Astro que convierte un proyecto en un blog estático completo, listo para AdSense y Cloudflare Pages.",
   "keywords": ["astro-integration", "astro", "blog", "adsense", "daisyui", "withastro"],
   "license": "MIT",
+  "author": {
+    "name": "Didier Estiben Piracoca Campos",
+    "url": "https://github.com/DidierPiracocaCampos"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DidierPiracocaCampos/astroblog.git",

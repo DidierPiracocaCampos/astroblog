@@ -13,7 +13,7 @@ Tú escribes la configuración y los posts en Markdown/MDX; la integración pone
 
 Requisitos: **Astro ≥ 7.4**, **Node ≥ 22.23.4**. Salida siempre estática (`output: 'static'`).
 
-> Hay un sitio de ejemplo completo en [`examples/demo`](../../examples/demo) del repositorio.
+> Hay un sitio de ejemplo completo en [`examples/demo`](https://github.com/DidierPiracocaCampos/astroblog/tree/main/examples/demo) del repositorio.
 
 ## Índice
 
@@ -27,6 +27,8 @@ Requisitos: **Astro ≥ 7.4**, **Node ≥ 22.23.4**. Salida siempre estática (`
 - [Checklist AdSense](#checklist-adsense)
 - [Despliegue en Cloudflare Pages](#despliegue-en-cloudflare-pages)
 - [Aviso legal sobre las plantillas](#aviso-legal-sobre-las-plantillas)
+- [Desarrollo](#desarrollo)
+- [Licencia](#licencia)
 
 ## Instalación
 
@@ -85,12 +87,12 @@ Todas las opciones se validan al iniciar Astro (`astro:config:setup`). Los error
 | `description` | `string` | — (obligatorio) | Descripción del sitio (portada, RSS, JSON-LD). |
 | `lang` | `'es' \| 'en'` | `'es'` | Idioma de los textos UI, las plantillas legales, los segmentos de URL y los mensajes de error. |
 | `logo` | `string` | — | Ruta **pública** del logo (p. ej. `'/logo.svg'` en `public/`), mostrado junto al título y usado en el JSON-LD. |
-| `author` | `{ name: string; email?: string; url?: string; avatar?: string; bio?: string; jobTitle?: string; sameAs?: string[] }` | — | Autor por defecto de los posts. `avatar` es una ruta pública. `jobTitle` y `bio` se muestran en la ficha del autor y en `/acerca/`; `jobTitle` y `sameAs` (perfiles externos) van al JSON-LD del post. |
+| `author` | `{ name: string; email?: string; url?: string; avatar?: string; bio?: string; jobTitle?: string; sameAs?: string[] }` | — | Autor por defecto de los posts. `avatar` es una ruta pública. `jobTitle` y `bio` se muestran en la ficha del autor y en `/acerca/`; `jobTitle` y `sameAs` (perfiles externos) van al JSON-LD del post. Si ni la config ni el post definen autor, el JSON-LD atribuye el post (autor y *publisher*) a una `Organization` con el `title` del sitio. |
 | `reviewers` | `Record<string, { name: string; jobTitle?: string; url?: string; bio?: string; avatar?: string }>` | — | Revisores expertos (YMYL), referenciados por su clave desde el campo `reviewer` del post. Si tienen `url`, el nombre enlaza a ella. |
 | `disclaimer` | `string` | — | Aviso que se muestra al final de cada post (p. ej. «no constituye asesoramiento financiero»). |
 | `seo.articleType` | `'BlogPosting' \| 'Article'` | `'BlogPosting'` | Tipo schema.org del JSON-LD de los posts. |
 | `permalinks` | `'blog' \| 'silo'` | `'blog'` | `silo` publica los posts en `/<categoria>/<slug>/` y cada categoría en `/<categoria>/`. Ver [Silos](#silos). |
-| `owner` | `{ name: string; country?: string; email?: string }` | — | Titular del sitio para las páginas legales, el copyright y el *publisher* del JSON-LD. |
+| `owner` | `{ name: string; country?: string; email?: string }` | — | Titular del sitio para las páginas legales, el copyright y el *publisher* del JSON-LD de los posts con autor. |
 | `social` | `Record<string, string>` | — | Enlaces sociales del pie: la clave es el texto del enlace y el valor la URL (`{ github: 'https://…' }`). |
 | `nav` | `{ label: string; href: string }[]` | `[]` | Menú principal. `href` relativo a la raíz del sitio (se le añade `base` y la barra final). |
 | `adsense` | objeto (ver abajo) | — | Sin él no se carga ningún script de anuncios, no se genera `ads.txt` y `AdSlot` no pinta nada. Requiere `site`. |
@@ -512,4 +514,8 @@ Las páginas de Privacidad, Cookies, Términos y Aviso legal se generan a partir
 
 ## Desarrollo
 
-Desarrollo en el monorepo: `pnpm install`, `pnpm test` (unitarios y builds de fixtures), `pnpm build:demo`. Cada cambio publicable lleva un changeset (`pnpm changeset`); la publicación en npm se hace desde `main` con GitHub Actions.
+Desarrollo en el monorepo: `pnpm install`, `pnpm test` (unitarios y builds de fixtures), `pnpm build:demo`. Cada cambio publicable lleva un changeset (`pnpm changeset`); la publicación en npm se hace desde `main` con GitHub Actions. Ver [CONTRIBUTING.md](https://github.com/DidierPiracocaCampos/astroblog/blob/main/CONTRIBUTING.md).
+
+## Licencia
+
+[MIT](https://github.com/DidierPiracocaCampos/astroblog/blob/main/LICENSE) © 2026 Didier Estiben Piracoca Campos.
