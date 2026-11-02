@@ -2,3 +2,7 @@ packages:
   - 'packages/*'
   - 'examples/*'
   - 'packages/astroblog/test/fixtures/*'
+
+# @tailwindcss/typography 0.5.20 fija 6.0.10 (GHSA: complejidad cuadrática); 6.1.x es compatible.
+overrides:
+  postcss-selector-parser@<6.1.5: ^6.1.5
