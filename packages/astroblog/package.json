@@ -1,6 +1,6 @@
 {
   "name": "@didierp/astroblog",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Integración de Astro que convierte un proyecto en un blog estático completo, listo para AdSense y Cloudflare Pages.",
   "keywords": ["astro-integration", "astro", "blog", "adsense", "daisyui", "withastro"],
   "license": "MIT",
